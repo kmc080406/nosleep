@@ -1191,6 +1191,47 @@ dialog::backdrop {
 .camera-video { object-fit:contain; background:#253029; }
 @media(max-width:480px) { .creator {margin-top:14px; font-size:11px;} .monitor h2 { font-size:clamp(25px,6.8vw,33px); } }
 
+/* Personal calibration: one instruction and one primary action per step. */
+.scan-screen {max-width:570px;margin:auto;padding:18px 0 22px;}
+.scan-step {font-size:12px;font-weight:650;letter-spacing:.02em;color:#697760;margin-bottom:15px;}
+.scan-screen h2 {font-size:clamp(25px,3vw,35px);font-weight:750;letter-spacing:-.055em;line-height:1.3;word-break:keep-all;}
+.scan-screen .subtitle {font-size:14px;margin:12px auto 0;max-width:460px;min-height:24px;}
+.scan-camera {width:min(352px,100%);aspect-ratio:4/3;position:relative;background:#29332d;border-radius:24px;margin:26px auto 0;overflow:hidden;isolation:isolate;}
+.scan-camera .camera-video {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:1;pointer-events:none;}
+.scan-guide {position:absolute;width:44%;height:74%;left:28%;top:7%;border:1px solid #ffffff66;border-radius:50%;z-index:1;pointer-events:none;transition:border-color .2s;}
+.scan-camera[data-quality=good] .scan-guide {border-color:#e3ed98;}
+.scan-quality {position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:#172017cb;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;white-space:nowrap;max-width:95%;z-index:2;}
+.scan-camera[data-quality=good] .scan-quality {color:#edf5c5;}
+.scan-progress {width:min(240px,70%);height:4px;background:#e3e8da;border-radius:8px;overflow:hidden;margin:20px auto 0;}
+.scan-progress span {display:block;width:0;height:100%;background:#697a42;border-radius:8px;transition:width .16s linear;}
+.scan-actions {display:flex;flex-direction:column;align-items:center;gap:3px;margin:22px auto 0;}
+.scan-actions .primary {min-height:54px;min-width:232px;font-size:14px;gap:26px;}
+.scan-actions .text-button {font-size:12px;min-height:36px;}
+.scan-complete-art {width:148px;height:148px;border-radius:50%;background:var(--accent);margin:34px auto 28px;display:grid;place-items:center;}
+.scan-complete-art svg {width:65px;height:65px;stroke-width:2.6;}
+.settings-tools {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;}
+.settings-tools .test-button {margin:0;min-width:0;padding:11px 6px;font-size:12px;gap:7px;justify-content:center;}
+.setting-caption {font-size:11px;color:var(--muted);line-height:1.7;margin-top:10px;}
+.scan-screen[data-phase=failed] .scan-complete-art {background:#f5e5d9;}
+@media(max-width:480px) {
+  .scan-screen {padding:14px 0 12px;}
+  .scan-screen h2 {font-size:26px;}
+  .scan-screen .subtitle {font-size:12px;max-width:320px;min-height:40px;padding:0 4px;}
+  .scan-step {margin-bottom:13px;font-size:11px;}
+  .scan-camera {width:min(320px,100%);margin-top:16px;border-radius:20px;}
+  .scan-progress {margin-top:17px;}
+  .scan-actions {margin-top:18px;}
+  .scan-quality {font-size:10px;}
+  .settings-help {font-size:11px;}
+}
+@media(max-height:740px) and (min-width:481px) {
+  .scan-screen {padding:10px 0;}
+  .scan-camera {width:300px;margin-top:18px;}
+  .scan-actions {margin-top:17px;}
+  .scan-step {margin-bottom:10px;}
+}
+@media(prefers-reduced-motion:reduce) {.scan-progress span,.scan-guide{transition:none!important;}}
+
 </style>
 </head>
 <body data-screen="intro">
@@ -1207,9 +1248,18 @@ dialog::backdrop {
 <h1 id="introTitle" tabindex="-1"><span>졸면,</span><span>깨워드릴게요.</span></h1>
 <p class="subtitle" id="introSubtitle">졸음이 5초 이어지면 알려드려요.</p>
 <button class="primary" id="startButton">시작하기<svg><use href="#i-arrow"></use></svg></button>
-<p class="intro-note" id="introNote">시작하면 카메라로 감지해요.</p>
+<p class="intro-note" id="introNote">먼저 내 눈과 책 보는 자세를 맞춰요.</p>
 <p class="creator">made by 김민찬</p>
 </div>
+</section>
+<section aria-labelledby="scanTitle" class="screen scan-screen" hidden id="scanScreen">
+<p class="scan-step" id="scanStep">나에게 맞추기 · 1 / 3</p>
+<h2 id="scanTitle" tabindex="-1">평소처럼 눈을 떠 주세요.</h2>
+<p class="subtitle" id="scanSubtitle">눈을 크게 뜨지 말고 편하게 정면을 봐 주세요.</p>
+<div class="scan-camera" id="scanCamera"><div class="scan-guide" aria-hidden="true"></div><span class="scan-quality" id="scanQuality" role="status">카메라를 확인하고 있어요.</span></div>
+<div class="scan-complete-art" hidden id="scanCompleteArt" aria-hidden="true"><svg viewBox="0 0 56 56"><path d="m15 28 9 9 18-19"/></svg></div>
+<div class="scan-progress" id="scanProgress" role="progressbar" aria-label="현재 단계 스캔 진행" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="scanProgressFill"></span></div>
+<div class="scan-actions"><button class="primary" id="scanButton">정면 스캔<svg><use href="#i-arrow"/></svg></button><button class="text-button" id="scanCancelButton">취소</button></div>
 </section>
 <section aria-labelledby="monitorTitle" class="screen monitor" hidden="" id="monitorScreen">
 <div class="visual" data-kind="preview" data-preview="false" id="visual">
@@ -1235,14 +1285,15 @@ dialog::backdrop {
 <p class="alarm-tag" hidden="" id="alarmTag">알림 미리보기</p><h2 id="alarmTitle" tabindex="-1">일어나!</h2><p class="subtitle" id="alarmSubtitle">졸음 신호가 5초 동안 이어졌어요.</p><div class="alarm-actions"><button class="primary" id="awakeButton"><span id="awakeButtonLabel">깼어요</span><svg><use href="#i-check"></use></svg></button><button class="text-button" id="alarmEndButton">종료하기</button></div>
 </section>
 </main>
-<footer class="footer"><p class="footer-note" id="footerNote"><svg><use href="#i-shield"></use></svg><span id="footerText">영상은 저장하거나 전송하지 않아요.</span></p></footer>
+<footer class="footer"><p class="footer-note" id="footerNote"><svg><use href="#i-shield"></use></svg><span id="footerText">영상은 기기 안에서 분석해요.</span></p></footer>
 </div>
 <dialog aria-labelledby="settingsTitle" id="settingsDialog">
 <h2 class="settings-title" id="settingsTitle">알림 설정</h2>
 <div class="setting-row"><div class="setting-label"><label for="delayInput">몇 초 뒤 깨울까요?</label><output class="setting-value" for="delayInput" id="delayValue">5초</output></div><input aria-describedby="delayHelp" class="range" id="delayInput" max="30" min="2" step="1" type="range" value="5"/><div class="range-ends" id="delayHelp"><span>2초</span><span>30초</span></div></div>
 <div class="setting-row sound-setting"><div class="setting-label"><label for="soundInput">소리로 깨우기</label><span class="switch"><input checked="" id="soundInput" type="checkbox"/><span aria-hidden="true" class="switch-track"></span></span></div></div>
-<button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button>
-<p class="settings-help">이 화면을 열어 두고 사용해 주세요.<br/>눈 가림·자세 변화는 별도 확인 알림이에요.<br/>수면 진단·운전용이 아니에요.</p>
+<div class="setting-row"><div class="setting-label"><label for="checkInput">가림·엎드림 확인 알림</label><span class="switch"><input id="checkInput" type="checkbox" aria-describedby="checkHelp"/><span aria-hidden="true" class="switch-track"></span></span></div><p class="setting-caption" id="checkHelp">켜면 20초 이상 눈이 안 보일 때 확인해요.</p></div>
+<div class="settings-tools"><button class="test-button" id="rescanButton"><svg><use href="#i-camera"/></svg>다시 스캔</button><button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button></div>
+<p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
 <button class="primary done-button" id="settingsDone">완료</button>
 </dialog>
 <div class="toast" hidden="" id="toast" role="status"></div>
@@ -1296,41 +1347,40 @@ const JoljimaCore = (() => {
 
   class DrowsinessGate {
     constructor(seconds = 5, maxGapMs = 1000) {
-      this.seconds = seconds;
-      this.maxGapMs = maxGapMs;
-      this.reset();
+      this.seconds = seconds; this.maxGapMs = maxGapMs; this.checkSeconds = 20; this.reset();
     }
-
     reset() {
-      this.lastAt = null;
-      this.lastKind = 'unknown';
-      this.lastReason = '';
-      this.sleepMs = 0;
-      this.fired = false;
+      this.lastAt = null; this.lastKind = 'unknown'; this.lastReason = '';
+      this.sleepMs = 0; this.fired = false; this.uncertainAt = null;
     }
-
     observe(kind, now, reason = '') {
-      if (!Number.isFinite(now) || now < 0) {
-        this.reset();
-        return {
-          kind: 'unknown', sleepMs: 0, trigger: false
-        };
+      if (!Number.isFinite(now) || now < 0 || (this.lastAt !== null && now <= this.lastAt)) {
+        this.reset(); return { kind: 'unknown', sleepMs: 0, trigger: false };
       }
       if (!KINDS.has(kind)) kind = 'unknown';
       const gap = this.lastAt === null ? 0 : now - this.lastAt;
-      const continuous = this.lastAt !== null && gap >= 0 && gap <= this.maxGapMs;
-      const active = kind === 'sleep' || kind === 'check';
-      const sameSleep = active && this.lastKind === kind && this.lastReason === reason && continuous;
-      this.sleepMs = sameSleep ? this.sleepMs + gap : 0;
-      if (!sameSleep) this.fired = false;
-      const trigger = active && !this.fired && this.sleepMs >= this.seconds * 1000;
+      const continuous = this.lastAt !== null && gap <= this.maxGapMs;
+      const previousSleep = this.lastKind === 'sleep' || this.uncertainAt !== null;
+      // At most 300 ms of uncertain eye scores can pause a sleepy interval.
+      // That time is never added. Missing faces, occlusion and clear waking
+      // observations always reset the interval immediately.
+      const uncertain = kind === 'unknown' && reason === 'uncertain' && previousSleep && continuous;
+      if (uncertain) {
+        if (this.uncertainAt === null) this.uncertainAt = now;
+        if (now - this.uncertainAt > 300) { this.sleepMs = 0; this.fired = false; this.uncertainAt = null; }
+      } else {
+        const resume = kind === 'sleep' && this.uncertainAt !== null && now - this.uncertainAt <= 300 && continuous;
+        const active = kind === 'sleep' || kind === 'check';
+        const same = active && this.lastKind === kind && this.lastReason === reason && continuous;
+        this.sleepMs = same ? this.sleepMs + gap : resume ? this.sleepMs : 0;
+        if (!same && !resume) this.fired = false;
+        this.uncertainAt = null;
+      }
+      const threshold = (kind === 'check' ? this.checkSeconds : this.seconds) * 1000;
+      const trigger = (kind === 'sleep' || kind === 'check') && !this.fired && this.sleepMs >= threshold;
       if (trigger) this.fired = true;
-      this.lastAt = now;
-      this.lastKind = kind;
-      this.lastReason = reason;
-      return {
-        kind, sleepMs: this.sleepMs, trigger
-      };
+      this.lastAt = now; this.lastKind = kind; this.lastReason = reason;
+      return { kind, sleepMs: this.sleepMs, trigger };
     }
   }
 
@@ -1356,6 +1406,7 @@ const JoljimaCore = (() => {
       seconds: Number.isInteger(saved?.seconds) && saved.seconds >= 2 && saved.seconds <= 30
       ? saved.seconds : 5,
       sound: typeof saved?.sound === 'boolean' ? saved.sound : true,
+      checkAlerts: typeof saved?.checkAlerts === 'boolean' ? saved.checkAlerts : false,
     };
   }
 
@@ -1486,22 +1537,29 @@ const JoljimaSignals = (() => {
   function faceFeatures(raw, w, h) {
     const p = raw.faceLandmarks?.[0];
     if (!p || p.length < 468) return null;
-    const left = eyeAspect(p, [33, 160, 158, 133, 153, 144], w, h);
-    const right = eyeAspect(p, [362, 385, 387, 263, 373, 380], w, h);
+    const left = eyeAspect(p, [362, 385, 387, 263, 373, 380], w, h);
+    const right = eyeAspect(p, [33, 160, 158, 133, 153, 144], w, h);
     if (!left || !right || !inFrame(p[1])) return null;
     const span = distance(left.center, right.center);
     if (span < 22) return null;
     const shapes = Object.fromEntries((raw.faceBlendshapes?.[0]?.categories ?? []).map(v => [v.categoryName, v.score]));
     const shapeL = shapes.eyeBlinkLeft;
     const shapeR = shapes.eyeBlinkRight;
-    const roll = Math.abs(Math.atan2(right.center.y - left.center.y, Math.abs(right.center.x - left.center.x)) * 180 / Math.PI);
+    const roll = Math.abs(Math.atan2(Math.abs(right.center.y - left.center.y), Math.abs(right.center.x - left.center.x)) * 180 / Math.PI);
     const zSkew = Math.abs((p[33].z ?? 0) - (p[263].z ?? 0)) * w / span;
     const balance = Math.min(left.width, right.width) / Math.max(left.width, right.width);
     // Oblique/near-profile eyes are explicitly not used for a sleep conclusion.
-    const reliable = roll < 60 && zSkew < .95 && balance > .52 &&
+    const reliable = roll < 60 && zSkew < 1.05 && balance > .42 &&
       Number.isFinite(shapeL) && Number.isFinite(shapeR);
     return {
       left, right, span, roll, zSkew, balance, reliable,
+      // Pose descriptors depend on the forehead/chin/nose, not eyelid aperture.
+      // They are relative features, NOT medically meaningful angles.
+      pose: {
+        pitch: valid(p[10]) && valid(p[152]) ? ((p[152].z ?? 0) - (p[10].z ?? 0)) * w / span : 0,
+        noseDrop: (p[1].y * h - mid(left.center, right.center).y) / span,
+        yaw: ((p[33].z ?? 0) - (p[263].z ?? 0)) * w / span,
+      },
       nose: point(p[1], w, h), center: mid(left.center, right.center),
       blinkL: shapeL ?? 0, blinkR: shapeR ?? 0,
       ear: (left.ear + right.ear) / 2,
@@ -1571,67 +1629,239 @@ const JoljimaSignals = (() => {
     return false;
   }
 
-  class Analyzer {
+  // Calibration and classification below use relative, per-eye values. There is
+  // deliberately no population-average EAR threshold or silent fallback profile.
+  const quantile = (values, q) => {
+    const a = values.filter(Number.isFinite).sort((x, y) => x - y);
+    if (!a.length) return null;
+    const at = (a.length - 1) * q, lo = Math.floor(at), hi = Math.ceil(at);
+    return a[lo] + (a[hi] - a[lo]) * (at - lo);
+  };
+  function summary(values) {
+    const mid = quantile(values, .5);
+    return { lo: quantile(values, .2), mid, hi: quantile(values, .8),
+      mad: quantile(values.map(v => Math.abs(v - mid)), .5) };
+  }
+  const poseDistance = (a, b) => Math.hypot((a.pitch - b.pitch) / .6, (a.noseDrop - b.noseDrop) / .3);
+  function inspect(raw) {
+    if (!raw) return { ok: false, reason: 'unavailable' };
+    if ((raw.faceLandmarks?.length ?? 0) > 1 || (raw.poseLandmarks?.length ?? 0) > 1)
+      return { ok: false, reason: 'multiple' };
+    const q = raw.quality ?? {};
+    // Face-local brightness avoids rejecting a well-lit face against a dark room.
+    const brightness = q.faceMean ?? q.mean;
+    if (Number.isFinite(brightness) && brightness < 12 && (q.faceContrast ?? 0) < 12)
+      return { ok: false, reason: 'dark' };
+    if (brightness > 251 && (q.faceContrast ?? 20) < 4)
+      return { ok: false, reason: 'glare' };
+    const w = raw.width || 640, h = raw.height || 480;
+    const face = faceFeatures(raw, w, h), body = bodyFeatures(raw, w, h);
+    const covered = eyeOcclusion(raw, face, body, w, h);
+    if (covered) return { ok: false, reason: 'covered', face, body };
+    if (!face) return { ok: false, reason: body?.solid ? (body.lying ? 'lying_hidden' : 'face_hidden') : 'not_found', face, body };
+    if (!face.reliable) return { ok: false, reason: 'angle', face, body };
+    if (Math.min(face.left.width, face.right.width) < 8 || face.span < 28)
+      return { ok: false, reason: 'too_far', face, body };
+    return { ok: true, face, body };
+  }
+  function snapshot(face) {
+    return { left: { ear: face.left.ear, blink: face.blinkL },
+      right: { ear: face.right.ear, blink: face.blinkR }, pose: { ...face.pose } };
+  }
+  function summarizeFrames(frames) {
+    const out = { count: frames.length, pose: {} };
+    for (const eye of ['left', 'right']) {
+      out[eye] = {};
+      for (const key of ['ear', 'blink']) out[eye][key] = summary(frames.map(f => f[eye][key]));
+    }
+    for (const key of ['pitch', 'noseDrop', 'yaw']) out.pose[key] = median(frames.map(f => f.pose[key]));
+    return out;
+  }
+  function channels(open, shut) {
+    const earGap = open.ear.lo - shut.ear.hi;
+    const blinkGap = shut.blink.lo - open.blink.hi;
+    return {
+      // The numerical floors below reject unresolved measurements; they are not
+      // thresholds for the physical size of a person's eyes.
+      ear: earGap > Math.max(.007, open.ear.mid * .045, 2.5 * (open.ear.mad + shut.ear.mad)),
+      blink: blinkGap > Math.max(.08, 2.5 * (open.blink.mad + shut.blink.mad)),
+      openEar: open.ear.lo, shutEar: shut.ear.hi,
+      openBlink: open.blink.hi, shutBlink: shut.blink.lo,
+    };
+  }
+  function combinedOpen(front, reading) {
+    return {
+      ear: { lo: Math.min(front.ear.lo, reading.ear.lo), mid: Math.min(front.ear.mid, reading.ear.mid), mad: Math.max(front.ear.mad, reading.ear.mad) },
+      blink: { hi: Math.max(front.blink.hi, reading.blink.hi), mad: Math.max(front.blink.mad, reading.blink.mad) },
+    };
+  }
+  function buildProfile(samples) {
+    if (samples.length !== 3 || samples.some(s => s.length < 10))
+      return { ok: false, reason: 'not_enough' };
+    const front = summarizeFrames(samples[0]), closed = summarizeFrames(samples[2]);
+    const hiddenReading = samples[1].filter(f => f.unobservable);
+    const visibleReading = samples[1].filter(f => !f.unobservable);
+    const readingHidden = hiddenReading.length > samples[1].length * .2 || visibleReading.length < 10;
+    const reading = readingHidden ? null : summarizeFrames(visibleReading);
+    if (poseDistance(front.pose, closed.pose) > .85 || Math.abs(front.pose.yaw - closed.pose.yaw) > .4)
+      return { ok: false, reason: 'closed_pose' };
+    const profiles = { front: {}, reading: {}, safe: {} };
+    if (readingHidden) {
+      // Do not discard the eye samples collected before a reading face became
+      // hidden. Even a few valid labelled samples can conservatively veto a
+      // false closure; they must not be promoted to a full reading calibration.
+      const partial = visibleReading.length >= 3 ? summarizeFrames(visibleReading) : null;
+      for (const eye of ['left', 'right']) {
+        profiles.front[eye] = channels(front[eye], closed[eye]);
+        if (partial) profiles.safe[eye] = channels(combinedOpen(front[eye], partial[eye]), closed[eye]);
+      }
+      const works = ref => ['left', 'right'].every(k => ref[k]?.ear || ref[k]?.blink);
+      if (!works(profiles.front)) return { ok: false, reason: 'inseparable' };
+      const safe = partial ? works(profiles.safe) : false;
+      if (partial && !safe && poseDistance(front.pose, partial.pose) < .65) return { ok: false, reason: 'reading_overlap' };
+      return { ok: true, profile: { version: 2, front, closed, reading: partial, profiles, safe, readingHidden: true,
+        readingHeadRise: median(hiddenReading.map(f => f.headRise).filter(Number.isFinite)),
+        limited: true, createdAt: Date.now() } };
+    }
+    for (const eye of ['left', 'right']) {
+      profiles.front[eye] = channels(front[eye], closed[eye]);
+      profiles.reading[eye] = channels(reading[eye], closed[eye]);
+      profiles.safe[eye] = channels(combinedOpen(front[eye], reading[eye]), closed[eye]);
+    }
+    const supported = ref => ['left', 'right'].every(k => ref[k].ear || ref[k].blink);
+    if (!supported(profiles.front)) return { ok: false, reason: 'inseparable' };
+    const safe = supported(profiles.safe);
+    const poseSeparation = poseDistance(front.pose, reading.pose);
+    // Overlapping reading/closed appearances are not magically separable.
+    // Permit front-only monitoring only when the poses themselves are distinct.
+    if (!safe && poseSeparation < .65) return { ok: false, reason: 'reading_overlap' };
+    return { ok: true, profile: { version: 2, front, reading, closed, profiles,
+      safe, poseSeparation, limited: !safe, createdAt: Date.now() } };
+  }
+
+  /** Three explicitly labelled captures, advanced only by valid observed frames. */
+  class Calibration {
     constructor() { this.reset(); }
     reset() {
-      this.startedAt = null;
-      this.openSamples = [];
-      this.riseSamples = [];
-      this.openReference = null;
-      this.riseReference = null;
-      this.calibrationDone = false;
-      this.lastAt = null;
+      this.step = 0; this.samples = [[], [], []]; this.phase = 'ready';
+      this.collectedMs = 0; this.lastValidAt = null; this.lastWasValid = false; this.lastAt = null;
+      this.startedAt = null; this.settleUntil = null; this.profile = null; this.error = '';
     }
-    analyze(raw, now) {
-      if (!raw || !Number.isFinite(now) || now < 0) return signal('unknown', 'unavailable');
-      if (this.lastAt !== null && now <= this.lastAt) return signal('unknown', 'stale');
+    start(now) {
+      if (this.phase === 'complete') return;
+      this.samples[this.step] = [];
+      this.phase = 'capture'; this.collectedMs = 0; this.lastValidAt = null; this.lastWasValid = false;
+      this.lastAt = null; this.startedAt = now; this.settleUntil = now + (this.step === 2 ? 1700 : 1100);
+      this.error = '';
+    }
+    status(reason = '') {
+      return { phase: this.phase, step: this.step, progress: clamp(this.collectedMs / this.duration, 0, 1), reason: reason || this.error,
+        profile: this.profile, limited: this.profile?.limited ?? false };
+    }
+    get duration() { return this.step === 2 ? 1800 : 2700; }
+    observe(raw, now) {
+      if (this.phase === 'complete' || this.phase === 'failed') return this.status();
+      const observation = inspect(raw);
+      if (this.phase !== 'capture') return this.status(observation.ok ? 'ready' : observation.reason);
+      if (!Number.isFinite(now) || now < 0 || (this.lastAt !== null && now <= this.lastAt)) return this.status('stale');
       this.lastAt = now;
-      if (this.startedAt === null) this.startedAt = now;
-      const w = raw.width || 640, h = raw.height || 480;
-      if ((raw.faceLandmarks?.length ?? 0) > 1 || (raw.poseLandmarks?.length ?? 0) > 1) return signal('unknown', 'multiple');
-      if (raw.quality && raw.quality.mean < 18) return signal('unknown', 'dark');
-      const face = faceFeatures(raw, w, h);
-      const body = bodyFeatures(raw, w, h);
-      const covered = eyeOcclusion(raw, face, body, w, h);
-      const clearOpen = face?.reliable && face.blinkL < .22 && face.blinkR < .22 && face.ear > .105 && face.ear < .5 && !covered;
-      if (!this.calibrationDone) {
-        if (clearOpen) {
-          this.openSamples.push(face.ear);
-          if (body?.headRise > .2 && body.headRise < 1.5) this.riseSamples.push(body.headRise);
+      if (now - this.startedAt > 25000) { this.phase = 'retry'; this.error = 'timeout'; return this.status(); }
+      if (now < this.settleUntil) return this.status('settle');
+      const postureOnly = this.step === 1 && !observation.ok && observation.body?.solid && ['face_hidden', 'angle', 'lying_hidden'].includes(observation.reason);
+      let reason = observation.ok || postureOnly ? '' : observation.reason;
+      const face = observation.face;
+      if (!reason && this.step === 2) {
+        const open = summarizeFrames(this.samples[0]);
+        if (poseDistance(face.pose, open.pose) > .85) reason = 'closed_pose';
+        else {
+          const changed = ['left', 'right'].every((eye, i) =>
+            face[eye].ear < open[eye].ear.mid * .88 || (i === 0 ? face.blinkL : face.blinkR) > open[eye].blink.hi + .1);
+          if (!changed) reason = 'close_eyes';
         }
-        const elapsed = now - this.startedAt;
-        if ((this.openSamples.length >= 12 && elapsed >= 1800) || elapsed >= 6000) {
-          this.openReference = this.openSamples.length >= 6 ? clamp(median(this.openSamples), .13, .38) : .27;
-          this.riseReference = this.riseSamples.length >= 4 ? median(this.riseSamples) : null;
-          this.calibrationDone = true;
-          this.openSamples.length = this.riseSamples.length = 0;
-        } else return signal('unknown', 'calibrating');
       }
-      if (covered) return signal('check', 'covered');
-      if (face?.reliable) {
-        const closedEar = clamp(this.openReference * .60, .075, .205);
-        const softEar = clamp(this.openReference * .82, .11, .26);
-        const closed = (face.blinkL >= .55 && face.blinkR >= .55 && face.ear < softEar) ||
-          (face.left.ear < closedEar && face.right.ear < closedEar && face.blinkL > .28 && face.blinkR > .28);
-        if (closed) return signal('sleep', 'eyes_closed');
+      if (reason) {
+        this.lastWasValid = false;
+        if (this.lastValidAt !== null && now - this.lastValidAt > 800) {
+          this.collectedMs = 0; this.samples[this.step] = []; this.lastValidAt = null;
+        }
+        return this.status(reason);
       }
-      if (body?.lying) return signal('check', 'lying');
-      if (body?.solid && body.headRise !== null) {
-        const drop = this.riseReference !== null ? this.riseReference - body.headRise : 0;
-        // Normal reading / a small nod must not be equated with sleeping.
-        const extreme = body.headRise < -.04 || (body.headRise < .12 && drop > .30);
-        if (extreme) return signal('check', 'head_down');
+      const gap = this.lastValidAt === null ? 0 : now - this.lastValidAt;
+      if (gap > 1000) { this.collectedMs = 0; this.samples[this.step] = []; }
+      if (this.lastWasValid && gap > 0 && gap <= 800) this.collectedMs += gap;
+      this.lastWasValid = true;
+      this.lastValidAt = now;
+      this.samples[this.step].push(postureOnly ? { unobservable: true, headRise: observation.body.headRise } : snapshot(face));
+      // Bound memory even on devices producing unusually high frame rates.
+      if (this.samples[this.step].length > 100) this.samples[this.step].splice(0, 1);
+      if (this.collectedMs >= this.duration && this.samples[this.step].length >= 10) {
+        if (this.step < 2) { this.step++; this.phase = 'ready'; this.collectedMs = 0; this.lastValidAt = null; }
+        else {
+          const result = buildProfile(this.samples);
+          if (result.ok) { this.profile = result.profile; this.phase = 'complete'; }
+          else { this.phase = 'failed'; this.error = result.reason; }
+          this.samples = [[], [], []]; // Retain only aggregate numeric references.
+        }
       }
-      if (face?.reliable) {
-        const open = face.blinkL < .45 && face.blinkR < .45 && face.ear > this.openReference * .67;
-        return open ? signal('awake', 'eyes_open') : signal('unknown', 'unclear_eyes');
-      }
-      if (face) return signal('check', 'angle');
-      if (body?.solid) return signal('check', 'face_hidden');
-      return signal('away', 'not_found');
+      return this.status(postureOnly && this.phase === 'capture' ? 'reading_hidden' : '');
     }
   }
-  return Object.freeze({ Analyzer, faceFeatures, bodyFeatures, eyeOcclusion, eyeAspect, median });
+
+  function closure(eye, blink, ref) {
+    const ear = ref.ear ? (ref.openEar - eye.ear) / (ref.openEar - ref.shutEar) : null;
+    const shape = ref.blink ? (blink - ref.openBlink) / (ref.shutBlink - ref.openBlink) : null;
+    if (ear === null && shape === null) return { usable: false };
+    // Each eye must cross its own calibrated threshold. An available second
+    // signal can veto uncertain geometry instead of blindly averaging it away.
+    const closed = ear !== null
+      ? (ear >= .70 && (shape === null || shape >= .45)) || (ear >= .50 && shape !== null && shape >= .90)
+      : shape >= .94;
+    const open = ear !== null ? ear <= .23 : shape <= .22;
+    return { usable: true, closed, open, ear, shape };
+  }
+
+  class Analyzer {
+    constructor() { this.profile = null; this.reset(); }
+    reset() { this.lastAt = null; }
+    setProfile(profile) {
+      this.profile = profile?.version === 2 ? profile : null;
+      this.reset();
+    }
+    analyze(raw, now) {
+      if (!Number.isFinite(now) || now < 0) return signal('unknown', 'unavailable');
+      if (this.lastAt !== null && now <= this.lastAt) return signal('unknown', 'stale');
+      this.lastAt = now;
+      if (!this.profile) return signal('unknown', 'needs_scan');
+      const checked = inspect(raw);
+      if (!checked.ok && this.profile.readingHidden && ['face_hidden', 'angle', 'lying_hidden'].includes(checked.reason) && checked.body?.solid) {
+        const reference = this.profile.readingHeadRise;
+        if (reference !== null && checked.body.headRise !== null && Math.abs(checked.body.headRise - reference) < .25)
+          return signal('unknown', 'reading_limited');
+      }
+      if (!checked.ok) return signal(checked.reason === 'not_found' ? 'away' : 'unknown', checked.reason,
+        { checkEligible: ['covered', 'lying_hidden', 'face_hidden'].includes(checked.reason) });
+      const f = checked.face, p = this.profile;
+      const frontDistance = poseDistance(f.pose, p.front.pose);
+      const readDistance = p.reading ? poseDistance(f.pose, p.reading.pose) : Infinity;
+      const yawNear = Math.min(Math.abs(f.pose.yaw - p.front.pose.yaw), p.reading ? Math.abs(f.pose.yaw - p.reading.pose.yaw) : Infinity);
+      // A different head angle is not drowsiness. Do not extrapolate a profile to
+      // a near-profile face or to a pose far outside either captured posture.
+      if (Math.min(frontDistance, readDistance) > 1.35 || yawNear > .65)
+        return signal('unknown', 'outside_pose');
+      let ref = p.profiles.safe;
+      if (!p.safe) {
+        if (frontDistance > .45 || readDistance < frontDistance + .25)
+          return signal('unknown', 'reading_limited');
+        ref = p.profiles.front;
+      }
+      const l = closure(f.left, f.blinkL, ref.left), r = closure(f.right, f.blinkR, ref.right);
+      if (!l.usable || !r.usable) return signal('unknown', 'unclear_eyes');
+      if (l.closed && r.closed) return signal('sleep', 'eyes_closed');
+      if (l.open || r.open) return signal('awake', readDistance + .15 < frontDistance ? 'reading' : 'eyes_open');
+      return signal('unknown', 'uncertain');
+    }
+  }
+  return Object.freeze({ Analyzer, Calibration, buildProfile, inspect, faceFeatures, bodyFeatures, eyeOcclusion, eyeAspect, median, quantile, closure });
 })();
 
 </script>
@@ -1725,16 +1955,34 @@ async function JoljimaVisionRuntime(config, progress = () => {}, externalSignal 
       latestHand = hand.detectForVideo(frame, at);
       handAt = at;
     }
-    let mean = 128;
+    let mean = 128, faceMean = null, faceContrast = null;
     if (qualityContext) {
-      qualityContext.drawImage(frame, 0, 0, 24, 18);
-      const pixels = qualityContext.getImageData(0, 0, 24, 18).data;
-      let sum = 0;
-      for (let i = 0; i < pixels.length; i += 4) sum += pixels[i] * .2126 + pixels[i + 1] * .7152 + pixels[i + 2] * .0722;
-      mean = sum / (pixels.length / 4);
+      const sample = (x, y, w, h) => {
+        qualityContext.drawImage(frame, x, y, w, h, 0, 0, 24, 18);
+        const pixels = qualityContext.getImageData(0, 0, 24, 18).data;
+        let sum = 0, square = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          const value = pixels[i] * .2126 + pixels[i + 1] * .7152 + pixels[i + 2] * .0722;
+          sum += value; square += value * value;
+        }
+        const average = sum / (pixels.length / 4);
+        return { mean: average, contrast: Math.sqrt(Math.max(0, square / (pixels.length / 4) - average * average)) };
+      };
+      mean = sample(0, 0, frame.width, frame.height).mean;
+      const landmarks = result.faceLandmarks?.[0];
+      if (landmarks?.length) {
+        const xs = [10, 152, 234, 454].map(i => landmarks[i].x);
+        const ys = [10, 152, 234, 454].map(i => landmarks[i].y);
+        const x = Math.max(0, Math.min(...xs)), y = Math.max(0, Math.min(...ys));
+        const w = Math.min(1, Math.max(...xs)) - x, h = Math.min(1, Math.max(...ys)) - y;
+        if (w > .03 && h > .03) {
+          const local = sample(x * frame.width, y * frame.height, w * frame.width, h * frame.height);
+          faceMean = local.mean; faceContrast = local.contrast;
+        }
+      }
     }
     return {
-      width: frame.width, height: frame.height, quality: { mean },
+      width: frame.width, height: frame.height, quality: { mean, faceMean, faceContrast },
       faceLandmarks: result.faceLandmarks ?? [], faceBlendshapes: result.faceBlendshapes ?? [],
       poseLandmarks: latestPose?.landmarks ?? [], poseAgeMs: at - poseAt,
       handLandmarks: latestHand?.landmarks ?? [], handAgeMs: at - handAt,
@@ -1841,7 +2089,7 @@ self.onmessage = async ({data}) => {
       worker.postMessage({ type: 'init', config: this.config });
     });
   }
-  async predict(canvas, at) {
+  async readFrame(canvas, at) {
     if (this.closed) throw new Error('AI 분석기가 종료됐어요.');
     let raw;
     if (this.worker) {
@@ -1856,8 +2104,10 @@ self.onmessage = async ({data}) => {
       });
     } else if (this.runtime) raw = this.runtime.detect(canvas, at);
     else throw new Error('AI 모델이 연결되지 않았어요.');
-    return this.analyzer.analyze(raw, at);
+    return raw;
   }
+  async predict(canvas, at) { return this.analyzer.analyze(await this.readFrame(canvas, at), at); }
+  setProfile(profile) { this.analyzer.setProfile(profile); }
   resetSession() { this.analyzer.reset(); }
   close() {
     if (this.closed) return;
@@ -1902,6 +2152,7 @@ self.onmessage = async ({data}) => {
   const settings = readSettings(storage, storageKey, 'jajima.simple.settings.v1');
   const app = {
     screen: 'intro', live: true, session: 0, cameraRequest: 0,
+    profile: null, scan: null, uiCandidate: '', uiAt: 0,
     stream: null, model: null, modelPromise: null, cameraVisible: false,
     paused: false, panelOpen: false, frameId: 0, frameSerial: 0,
     processedFrame: -1, lastFrameAt: 0, lastVideoTime: -1,
@@ -1917,23 +2168,24 @@ self.onmessage = async ({data}) => {
   let context = null;
   const video = $('cameraVideo');
   const dialog = $('settingsDialog');
+  const videoHome = video.parentElement;
   const circleLength = 2 * Math.PI * 134;
   const routes = {
-    intro: 'introScreen', monitor: 'monitorScreen', loading: 'loadingScreen', error: 'errorScreen', alarm: 'alarmScreen'
+    intro: 'introScreen', scan: 'scanScreen', monitor: 'monitorScreen', loading: 'loadingScreen', error: 'errorScreen', alarm: 'alarmScreen'
   };
   const headings = {
-    intro: 'introTitle', monitor: 'monitorTitle', loading: 'loadingTitle', error: 'errorTitle', alarm: 'alarmTitle'
+    intro: 'introTitle', scan: 'scanTitle', monitor: 'monitorTitle', loading: 'loadingTitle', error: 'errorTitle', alarm: 'alarmTitle'
   };
   const clockIcon = $('liveDetail').querySelector('svg');
   const readoutValue = $('sleepReadout').firstChild;
   const readoutLimit = $('sleepReadout').querySelector('span');
   const messages = Object.freeze({
     preview: ['준비됐어요.', '모델을 연결하면 감지가 시작돼요.'],
-    awake: ['눈을 뜨고 있어요.', '하던 일에 집중하세요. 졸면 깨워드릴게요.'],
+    awake: ['편하게 집중하세요.', '책을 보거나 필기해도 괜찮아요.'],
     sleep: ['눈 감김이 이어지고 있어요.', ''],
     check: ['모습을 확인해 주세요.', ''],
     away: ['사람을 찾고 있어요.', '모습이 보이면 다시 확인할게요.'],
-    unknown: ['모습을 확인하고 있어요.', '얼굴과 어깨가 보이게 앉아 주세요.'],
+    unknown: ['잠시 확인을 쉬고 있어요.', '눈이 보이면 다시 확인할게요.'],
     paused: ['잠시 멈췄어요.', '준비되면 다시 이어서 해요.'],
   });
   let renderKey = '';
@@ -1952,9 +2204,10 @@ self.onmessage = async ({data}) => {
     $('delayInput').setAttribute('aria-valuetext', settings.seconds + '초');
     setText('delayValue', settings.seconds + '초');
     $('soundInput').checked = settings.sound;
+    $('checkInput').checked = settings.checkAlerts;
     setText('introSubtitle', '졸음이 ' + settings.seconds + '초 이어지면 알려드려요.');
     setText('delayLabel', settings.seconds + '초 후 알림' + (settings.sound ? '' : ' · 무음'));
-    setText('introNote', app.live ? '시작하면 카메라로 감지해요.' : '지금은 모델 연결 전 미리보기예요.');
+    setText('introNote', app.live ? '먼저 내 눈과 책 보는 자세를 맞춰요.' : '지금은 모델 연결 전 미리보기예요.');
   }
   function toast(message) {
     clearTimeout(app.toastId);
@@ -1965,6 +2218,12 @@ self.onmessage = async ({data}) => {
   function setScreen(name, focus = true) {
     app.screen = name;
     document.body.dataset.screen = name;
+    const target = name === 'scan' ? $('scanCamera') : videoHome;
+    if (video.parentElement !== target) {
+      target.prepend(video);
+      if (app.stream) video.play().catch(() => {});
+    }
+    if (name === 'scan') video.setAttribute('aria-hidden', 'false');
     for (const [key, id] of Object.entries(routes)) show(id, key === name);
     const monitor = name === 'monitor';
     show('credit', !monitor);
@@ -1972,8 +2231,9 @@ self.onmessage = async ({data}) => {
     show('settingsButton', monitor && !app.paused);
     setText('modeTag', app.paused ? '일시 정지' : app.live ? '감지 중' : '미리보기');
     $('modeTag').classList.toggle('live', app.live && !app.paused);
-    let footer = '영상은 저장하거나 전송하지 않아요.';
-    if (monitor) footer = app.paused ? '잠시 멈춘 동안에는 카메라도 꺼져 있어요.' : app.live ? '감지하려면 이 화면을 열어 두세요.' : '영상은 저장하거나 전송하지 않아요.';
+    let footer = '영상은 기기 안에서 분석해요.';
+    if (monitor) footer = app.paused ? '잠시 멈춘 동안에는 카메라도 꺼져 있어요.' : app.live ? '감지하려면 이 화면을 열어 두세요.' : '영상은 기기 안에서 분석해요.';
+    if (name === 'scan') footer = '사진 없이 숫자 기준만 이번 세션에 사용해요.';
     if (name === 'alarm') footer = settings.sound ? '버튼을 누르면 알림이 멈춰요.' : '소리 없이 화면으로 알리고 있어요.';
     setText('footerText', footer);
     cancelAnimationFrame(app.focusId);
@@ -1988,38 +2248,44 @@ self.onmessage = async ({data}) => {
     if (!Object.hasOwn(messages, kind)) kind = 'unknown';
     const key = `${kind}:${reason}:${settings.seconds}:${app.cameraVisible}`;
     const sleeping = kind === 'sleep' || kind === 'check';
+    const thresholdSeconds = kind === 'check' ? gate.checkSeconds : settings.seconds;
     if (renderKey !== key) {
       renderKey = key;
       $('visual').dataset.kind = kind;
       let [title, base] = messages[kind];
       const details = {
-        calibrating: ['정면을 잠깐 봐 주세요.', '눈을 뜬 기준을 맞추고 있어요.'],
-        dark: ['화면이 너무 어두워요.', '조명을 켜고 카메라가 가려졌는지 확인해 주세요.'],
-        multiple: ['한 사람만 보여 주세요.', '여러 사람이 보이면 판단을 멈춰요.'],
-        unclear_eyes: ['눈을 확인하고 있어요.', '정면에서 눈이 잘 보이게 해 주세요.'],
-        covered: ['눈이 잘 안 보여요.', ''],
-        lying: ['누운 자세로 보여요.', ''],
-        head_down: ['고개가 많이 내려갔어요.', ''],
-        face_hidden: ['얼굴을 확인할 수 없어요.', ''],
-        angle: ['정면에서 확인해 주세요.', ''],
+        needs_scan: ['맞춤 스캔이 필요해요.', '설정에서 다시 스캔해 주세요.'],
+        dark: ['조금 더 밝게 해 주세요.', '눈이 보일 때만 확인하고 있어요.'],
+        glare: ['빛 반사를 줄여 주세요.', '카메라나 조명 방향을 조금 바꿔 주세요.'],
+        multiple: ['한 사람만 확인할 수 있어요.', '지금은 판단을 멈췄어요.'],
+        unclear_eyes: ['눈을 더 확인하고 있어요.', '확실하지 않을 때는 깨우지 않아요.'],
+        uncertain: ['눈을 더 확인하고 있어요.', '확실하지 않을 때는 깨우지 않아요.'],
+        covered: ['눈이 잠깐 가려졌어요.', '다시 보이면 이어서 확인해요.'],
+        lying_hidden: ['눈을 확인하기 어려워요.', '자세만으로 졸음이라고 판단하지 않아요.'],
+        face_hidden: ['눈을 확인하기 어려워요.', '보이지 않는 동안은 판단을 쉬어요.'],
+        angle: ['지금 각도에서는 잘 안 보여요.', '보이지 않는 동안은 판단을 쉬어요.'],
+        outside_pose: ['지금 자세는 확인이 어려워요.', '이 자세를 계속 쓴다면 설정에서 다시 스캔해 주세요.'],
+        reading_limited: ['책 보는 자세를 확인 중이에요.', '눈 감김과 구분이 어려워 깨우지 않아요.'],
+        too_far: ['카메라에서 조금 가까이 와 주세요.', '눈이 작게 잡혀서 판단을 쉬고 있어요.'],
+        reading: ['편하게 읽으세요.', '책 보는 자세로 확인하고 있어요.'],
       };
       if (details[reason]) [title, base] = details[reason];
       const sub = sleeping
-      ? settings.seconds + (kind === 'sleep' ? '초가 되면 깨워드릴게요.' : '초 이어지면 확인 알림을 드려요.')
+      ? thresholdSeconds + (kind === 'sleep' ? '초가 되면 깨워드릴게요.' : '초 이어지면 확인 알림을 드려요.')
       : kind === 'preview' && app.cameraVisible ? '카메라 화면만 확인하고 있어요.' : base;
       setText('monitorTitle', title);
       setText('monitorSubtitle', sub);
       show('delayLabel', !sleeping && kind !== 'paused');
       clockIcon.style.display = sleeping || kind === 'paused' ? 'none' : '';
       show('sleepReadout', sleeping);
-      readoutLimit.textContent = '/ ' + settings.seconds + '초';
+      readoutLimit.textContent = '/ ' + thresholdSeconds + '초';
     }
-    const elapsed = sleeping ? Math.min(Math.max(ms, 0), settings.seconds * 1000) : 0;
+    const elapsed = sleeping ? Math.min(Math.max(ms, 0), thresholdSeconds * 1000) : 0;
     if (sleeping) {
       const value = (elapsed / 1000).toFixed(1) + '초';
       if (readoutValue.nodeValue !== value) readoutValue.nodeValue = value;
     }
-    const offset = (circleLength * (1 - elapsed / (settings.seconds * 1000))).toFixed(3);
+    const offset = (circleLength * (1 - elapsed / (thresholdSeconds * 1000))).toFixed(3);
     if (lastOffset !== offset) {
       $('ringFill').style.strokeDashoffset = offset;
       lastOffset = offset;
@@ -2036,6 +2302,116 @@ self.onmessage = async ({data}) => {
     setText('cameraLabel', app.live ? '내 카메라' : '미리보기 · 분석 안 함');
     if (!app.live && app.screen === 'monitor' && !app.paused) renderState('preview');
   }
+  // ── 개인 기준 스캔 ────────────────────────────────────────────
+  function renderObservation(result, reason, now) {
+    let { kind, sleepMs } = result;
+    // Blink-length closures still update the timer, but do not flash a warning.
+    if (kind === 'sleep' && sleepMs < 650) { kind = 'awake'; reason = 'eyes_open'; sleepMs = 0; }
+    const key = kind + ':' + reason;
+    if (app.uiCandidate !== key) { app.uiCandidate = key; app.uiAt = now; }
+    if ((kind === 'unknown' || kind === 'away') && now - app.uiAt < 600) return;
+    renderState(kind, sleepMs, reason);
+  }
+  function speakScan(message) {
+    if (!settings.sound || document.hidden || app.screen !== 'scan') return;
+    primeAudio();
+    // A small chime also works when a Korean speech voice is unavailable.
+    try {
+      if (app.audio?.state === 'running') {
+        const oscillator = app.audio.createOscillator(), gain = app.audio.createGain();
+        const at = app.audio.currentTime;
+        oscillator.frequency.value = 660;
+        gain.gain.setValueAtTime(.08, at); gain.gain.exponentialRampToValueAtTime(.001, at + .18);
+        oscillator.connect(gain); gain.connect(app.audio.destination);
+        const tone = { oscillator, gain }; app.audioNodes.add(tone);
+        oscillator.onended = () => { app.audioNodes.delete(tone); oscillator.disconnect(); gain.disconnect(); };
+        oscillator.start(at); oscillator.stop(at + .2);
+      }
+      if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+        speechSynthesis.cancel();
+        const speech = new SpeechSynthesisUtterance(message); speech.lang = 'ko-KR'; speech.rate = 1.1; speech.volume = .6;
+        speechSynthesis.speak(speech);
+      }
+    } catch (_) {}
+  }
+  function renderScan(status) {
+    const { phase, step, progress, reason, limited } = status;
+    const titles = ['평소처럼 눈을 떠 주세요.', '책을 보듯 아래를 봐 주세요.', '정면에서 눈을 감아 주세요.'];
+    const descriptions = [
+      '눈을 크게 뜨지 말고 편하게 정면을 봐 주세요.',
+      '평소 공부하는 높이로 고개와 시선을 내려 주세요.',
+      settings.sound ? '버튼을 누른 뒤 감아 주세요. 끝나면 소리로 알려드려요.' : '버튼을 누른 뒤 천천히 다섯을 세고 눈을 떠 주세요.',
+    ];
+    const hints = {
+      multiple: '한 사람만 보이게 해 주세요.', dark: '눈 주변에 빛이 조금 더 필요해요.',
+      glare: '조명이나 안경 반사를 줄여 주세요.', covered: '손으로 눈을 가리지 말아 주세요.',
+      face_hidden: '스캔할 때는 얼굴이 보이게 해 주세요.', not_found: '얼굴이 카메라 안에 들어오게 해 주세요.',
+      angle: '양쪽 눈이 보이게 살짝 돌아 주세요.', too_far: '카메라에 조금 더 가까이 와 주세요.',
+      closed_pose: '고개는 정면에 두고 눈만 감아 주세요.', close_eyes: '눈을 편하게 감아 주세요.',
+      reading_hidden: '이 자세에서 눈이 안 보이면 알리지 않아요.',
+      stale: '새 카메라 화면을 기다리고 있어요.', settle: '자세를 맞추는 중…',
+      lying_hidden: '스캔할 때는 얼굴이 보이게 해 주세요.',
+    };
+    const finished = phase === 'complete' || phase === 'failed';
+    $('scanScreen').dataset.phase = phase;
+    setText('scanStep', finished ? '나에게 맞추기' : `나에게 맞추기 · ${step + 1} / 3`);
+    show('scanCamera', !finished); show('scanCompleteArt', finished); show('scanProgress', !finished);
+    $('scanButton').disabled = phase === 'capture';
+    if (finished) {
+      const success = phase === 'complete';
+      setText('scanTitle', success ? '맞춤 준비가 끝났어요.' : '한 번 더 맞춰 볼게요.');
+      const failures = {
+        reading_overlap: '책 볼 때와 눈 감김이 비슷해요. 카메라를 조금 낮춰 다시 해 주세요.',
+        closed_pose: '눈 감기 단계에서 고개가 움직였어요. 정면을 유지해 주세요.',
+        inseparable: '눈 뜸과 감김이 잘 구분되지 않았어요. 조명과 안경 반사를 확인해 주세요.',
+      };
+      setText('scanSubtitle', success ? (limited ? '책 볼 때 눈이 구분되지 않으면 판단을 쉬어요.' : '내 눈 모양과 책 보는 자세를 기준으로 확인해요.') : (failures[reason] || '눈이 선명하게 보이는 위치에서 다시 해 주세요.'));
+      $('scanCompleteArt').querySelector('path').setAttribute('d', success ? 'm15 28 9 9 18-19' : 'M28 15v18m0 8h.01');
+      $('scanButton').firstChild.nodeValue = success ? '감지 시작' : '다시 스캔';
+      return;
+    }
+    setText('scanTitle', titles[step]);
+    setText('scanSubtitle', phase === 'retry' ? '스캔이 잘 이어지지 않았어요. 위치를 맞춰 다시 눌러 주세요.' : descriptions[step]);
+    const good = !reason || reason === 'ready';
+    $('scanCamera').dataset.quality = good ? 'good' : 'waiting';
+    const defaultHint = phase === 'capture' ? '그대로 유지해 주세요.' : step === 0 ? '안경은 평소대로 쓰세요.' : step === 1 ? '책이나 필기할 곳을 봐 주세요.' : '준비되면 아래 버튼을 눌러 주세요.';
+    setText('scanQuality', hints[reason] || defaultHint);
+    const percent = Math.round(progress * 100);
+    $('scanProgressFill').style.width = percent + '%';
+    $('scanProgress').setAttribute('aria-valuenow', String(percent));
+    $('scanButton').firstChild.nodeValue = phase === 'capture' ? '스캔 중…' : phase === 'retry' ? '다시 해보기' : ['정면 스캔', '책 보는 자세 스캔', '눈 감김 스캔'][step];
+  }
+  function beginScan() {
+    haltLoop(); stopAudio();
+    app.profile = null; app.scan = new JoljimaSignals.Calibration();
+    app.model.setProfile(null); app.paused = false; app.panelOpen = false;
+    cameraUI(false); setScreen('scan'); renderScan(app.scan.status());
+    requestWakeLock(); startLoop();
+  }
+  $('scanButton').addEventListener('click', () => {
+    if (app.screen !== 'scan' || !app.scan || document.hidden) return;
+    if (app.scan.phase === 'complete') {
+      app.profile = app.scan.profile;
+      app.model.setProfile(app.profile);
+      app.scan = null; haltLoop(); stopAudio(); cameraUI(false);
+      setScreen('monitor'); renderState('awake'); requestWakeLock(); startLoop();
+    } else if (app.scan.phase === 'failed') beginScan();
+    else if (app.scan.phase !== 'capture') {
+      primeAudio();
+      if (app.scan.step === 2) speakScan('정면에서 눈을 편하게 감아 주세요.');
+      app.scan.start(performance.now()); renderScan(app.scan.status('settle')); startLoop();
+    }
+  });
+  $('rescanButton').addEventListener('click', () => {
+    if (app.screen !== 'monitor' || app.paused || !app.model || !app.stream) return;
+    app.panelOpen = false;
+    // Change route before the dialog close event can restart a monitor loop.
+    setScreen('scan', false); dialog.close(); beginScan();
+  });
+  $('checkInput').addEventListener('change', event => {
+    settings.checkAlerts = event.target.checked; gate.reset(); saveSettings();
+  });
+
   // ── 카메라 수명과 새 프레임 추적 ──────────────────────────────
   function stopFrameWatch() {
     if (app.frameId && video.cancelVideoFrameCallback) {
@@ -2098,9 +2474,9 @@ self.onmessage = async ({data}) => {
       audio: false,
       video: {
         facingMode: 'user', width: {
-          ideal: 640
+          ideal: 960
         }, height: {
-          ideal: 480
+          ideal: 720
         },
         frameRate: {
           ideal: 20, max: 30
@@ -2129,7 +2505,7 @@ self.onmessage = async ({data}) => {
       for (const track of stream.getVideoTracks()) {
         const ended = () => {
           if (app.stream !== stream) return;
-          if (app.live && ['monitor', 'alarm'].includes(app.screen)) {
+          if (app.live && ['monitor', 'scan', 'alarm'].includes(app.screen)) {
             pauseSession();
             toast('카메라 연결이 끊겼어요. 연결 후 이어서 해 주세요.');
           } else {
@@ -2228,11 +2604,11 @@ self.onmessage = async ({data}) => {
   }
   function startLoop() {
     haltLoop();
-    if (!app.live || app.paused || app.panelOpen || app.screen !== 'monitor') return;
+    if (!app.live || app.paused || app.panelOpen || !['monitor', 'scan'].includes(app.screen)) return;
     const run = app.runId;
     const session = app.session;
     const current = () => run === app.runId && session === app.session &&
-    app.screen === 'monitor' && !app.paused && !app.panelOpen && !document.hidden;
+    ['monitor', 'scan'].includes(app.screen) && !app.paused && !app.panelOpen && !document.hidden;
     const schedule = (delay = JOLJIMA_LIMITS.sampleIntervalMs) => {
       if (current()) app.loopId = setTimeout(tick, delay);
     };
@@ -2260,7 +2636,8 @@ self.onmessage = async ({data}) => {
       serial === app.processedFrame || now - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs) {
         if (now - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs) {
           gate.reset();
-          renderState('unknown');
+          if (app.screen === 'scan') renderScan(app.scan.status('stale'));
+          else renderState('unknown');
         }
         schedule();
         return;
@@ -2269,29 +2646,39 @@ self.onmessage = async ({data}) => {
       const capturedAt = now;
       try {
         // Preserve the WHOLE image: a square crop would remove shoulders/hands.
-        const scale = Math.min(1, 640 / video.videoWidth, 640 / video.videoHeight);
+        const scale = Math.min(1, 768 / video.videoWidth, 768 / video.videoHeight);
         const width = Math.round(video.videoWidth * scale);
         const height = Math.round(video.videoHeight * scale);
         if (canvas.width !== width) canvas.width = width;
         if (canvas.height !== height) canvas.height = height;
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.drawImage(video, 0, 0, width, height);
-        const task = predictions.run(() => app.model.predict(canvas, capturedAt), now);
-        const values = await withTimeout(task, JOLJIMA_LIMITS.predictionTimeoutMs, 'AI 응답 시간이 초과됐어요.');
+        const task = predictions.run(() => app.model.readFrame(canvas, capturedAt), now);
+        const raw = await withTimeout(task, JOLJIMA_LIMITS.predictionTimeoutMs, 'AI 응답 시간이 초과됐어요.');
         if (!current()) return;
         const ended = performance.now();
         if (ended - capturedAt > JOLJIMA_LIMITS.maxFrameGapMs ||
         ended - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs || ended < app.cooldownUntil) {
           gate.reset();
-          renderState('unknown');
+          if (app.screen === 'scan') renderScan(app.scan.status('stale'));
+          else renderState('unknown');
         } else {
           // 추론 완료 시각 대신 실제 입력을 읽은 시각으로 연속 시간을 계산합니다.
-          app.lastObservation = values;
-          const result = gate.observe(values.kind, capturedAt, values.reason);
-          renderState(result.kind, result.sleepMs, values.reason);
-          if (result.trigger) {
-            beginAlarm(false, values.reason);
-            return;
+          if (app.screen === 'scan') {
+            const status = app.scan.observe(raw, capturedAt);
+            renderScan(status);
+            if (status.phase === 'complete' || status.phase === 'failed') {
+              haltLoop();
+              speakScan(status.phase === 'complete' ? '스캔이 끝났어요. 눈을 떠 주세요.' : '눈을 떠 주세요. 스캔을 다시 확인할게요.');
+              return;
+            }
+          } else {
+            const values = app.model.analyzer.analyze(raw, capturedAt);
+            app.lastObservation = values;
+            const kind = settings.checkAlerts && values.checkEligible ? 'check' : values.kind;
+            const result = gate.observe(kind, capturedAt, values.reason);
+            renderObservation(result, values.reason, ended);
+            if (result.trigger) { beginAlarm(false, values.reason); return; }
           }
         }
       } catch (error) {
@@ -2314,7 +2701,7 @@ self.onmessage = async ({data}) => {
     try {
       const lock = await navigator.wakeLock.request('screen');
       if (version !== app.wakeVersion || document.hidden ||
-      !['monitor', 'alarm'].includes(app.screen) || app.paused) {
+      !['monitor', 'scan', 'alarm'].includes(app.screen) || app.paused) {
         await lock.release();
         return;
       }
@@ -2403,7 +2790,7 @@ self.onmessage = async ({data}) => {
           app.soundTimeouts.delete(timer);
           if (app.screen !== 'alarm' || !settings.sound || document.hidden) return;
           speechSynthesis.cancel();
-          const phrase = new SpeechSynthesisUtterance(app.alarmReason === 'eyes_closed' ? '일어나!' : '모습을 확인해 주세요!');
+          const phrase = new SpeechSynthesisUtterance(app.alarmReason === 'eyes_closed' ? '일어나!' : '모습을 확인해 주세요.');
           phrase.lang = 'ko-KR';
           phrase.rate = 1.03;
           phrase.volume = .85;
@@ -2434,12 +2821,12 @@ self.onmessage = async ({data}) => {
       dialog.close();
     }
     const isSleep = test || reason === 'eyes_closed';
-    const reasons = { covered: '눈 가림', lying: '누운 자세', head_down: '고개 숙임', face_hidden: '얼굴 확인 어려움', angle: '얼굴 각도 확인 어려움' };
+    const reasons = { lying_hidden: '눈 확인이 어려운 자세', covered: '눈 가림', lying: '누운 자세', head_down: '고개 숙임', face_hidden: '얼굴 확인 어려움', angle: '얼굴 각도 확인 어려움' };
     setText('alarmTitle', isSleep ? '일어나!' : '괜찮아요?');
     $('alarmScreen').classList.toggle('check-alarm', !isSleep);
     setText('awakeButtonLabel', isSleep ? '깼어요' : '확인했어요');
     setText('alarmSubtitle', test ? '이렇게 알려드릴게요.' :
-      (isSleep ? '눈 감김이 ' : (reasons[reason] || '확인이 어려운 모습') + ' 상태가 ') + settings.seconds + '초 동안 이어졌어요.');
+      (isSleep ? '눈 감김이 ' : (reasons[reason] || '확인이 어려운 모습') + ' 상태가 ') + (isSleep ? settings.seconds : gate.checkSeconds) + '초 동안 이어졌어요.');
     show('alarmTag', test);
     setScreen('alarm');
     alarmSound();
@@ -2481,12 +2868,15 @@ self.onmessage = async ({data}) => {
     show('settingsButton', false);
     app.alarmTest = false;
     app.cooldownUntil = 0;
+    app.profile = null;
+    app.scan = null;
     releaseModel();
     setScreen('intro');
     syncSettings();
   }
   async function startSession() {
     if (document.hidden || (!['intro', 'error'].includes(app.screen) && !app.paused)) return;
+    const resumeProfile = app.paused ? app.profile : null;
     stopCamera();
     primeAudio();
     stopAudio();
@@ -2513,10 +2903,14 @@ self.onmessage = async ({data}) => {
       await ensureCamera(session);
       if (session !== app.session || document.hidden || !app.stream) return;
       app.model.resetSession();
-      setScreen('monitor');
-      renderState('unknown', 0, 'calibrating');
-      requestWakeLock();
-      startLoop();
+      if (resumeProfile) {
+        app.profile = resumeProfile;
+        app.model.setProfile(resumeProfile);
+        setScreen('monitor');
+        renderState('unknown');
+        requestWakeLock();
+        startLoop();
+      } else beginScan();
     } catch (error) {
       if (session !== app.session) return;
       haltLoop();
@@ -2527,7 +2921,7 @@ self.onmessage = async ({data}) => {
     }
   }
   function pauseSession() {
-    if (!['monitor', 'loading', 'alarm'].includes(app.screen)) return;
+    if (!['monitor', 'scan', 'loading', 'alarm'].includes(app.screen)) return;
     if (app.screen === 'loading') releaseModel();
     app.session++;
     app.paused = true;
@@ -2587,7 +2981,7 @@ self.onmessage = async ({data}) => {
   $('resumeButton').addEventListener('click', () => startSession());
   $('cameraButton').addEventListener('click', toggleCamera);
   $('awakeButton').addEventListener('click', dismissAlarm);
-  ['endButton', 'alarmEndButton', 'pausedEndButton', 'cancelButton', 'errorHomeButton'].forEach(id => $(id).addEventListener('click',
+  ['endButton', 'alarmEndButton', 'pausedEndButton', 'cancelButton', 'errorHomeButton', 'scanCancelButton'].forEach(id => $(id).addEventListener('click',
   stopSession));
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
