@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#f8f9f5" name="theme-color"/>
+<meta content="졸음이 이어지면 깨워주는 졸지마! 코드메이트 AI 프로젝트." name="description"/>
+<title>졸지마! — 졸면, 깨워드릴게요.</title>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='24' fill='%23e3ed98'/%3E%3Cpath d='M23 24v16m18-16v16' stroke='%23262e29' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E" rel="icon"/>
+<style>
+/* 기존 디자인 유지: 선택자·속성값·미디어 쿼리 순서는 동일합니다. */
+:root {
+  --bg:#f8f9f5;
+  --ink:#262e29;
+  --muted:#737b72;
+  --line:#dfe3d8;
+  --accent:#e3ed98;
+  --accent-soft:#eef2db;
+  --alert:#f7ccb5;
+  --font:"Pretendard Variable",Pretendard,"Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif
+}
+* {
+  box-sizing:border-box
+}
+html {
+  min-height:100%;
+  background:var(--bg);
+  color-scheme:light
+}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font);
+  font-size:16px;
+  letter-spacing:-.035em;
+  -webkit-font-smoothing:antialiased;
+  transition:background .35s
+}
+button,input {
+  font:inherit
+}
+button {
+  color:inherit;
+  cursor:pointer;
+  border:0;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent
+}
+button:disabled {
+  cursor:wait;
+  opacity:.55
+}
+button:focus-visible,input:focus-visible {
+  outline:3px solid #567543;
+  outline-offset:5px
+}
+button {
+  transition:background .18s,transform .18s,box-shadow .18s
+}
+button:active:not(:disabled) {
+  transform:scale(.98)
+}
+svg {
+  width:22px;
+  height:22px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.65;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  display:block;
+  flex:none
+}
+h1,h2,h3,p {
+  margin:0
+}
+h1:focus,h2:focus {
+  outline:none
+}
+[hidden] {
+  display:none!important
+}
+.sr-only {
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap
+}
+.app {
+  min-height:100svh;
+  min-height:100dvh;
+  display:grid;
+  grid-template-rows:98px 1fr 64px;
+  width:min(1280px,100% - 96px);
+  margin:auto
+}
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:850;
+  letter-spacing:-1.4px;
+  font-size:25px;
+  user-select:none
+}
+.brand-mark {
+  width:31px;
+  height:31px;
+  background:var(--accent);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  transform:rotate(-7deg)
+}
+.brand-mark i {
+  display:block;
+  width:4px;
+  height:12px;
+  background:var(--ink);
+  border-radius:4px
+}
+.wordmark>span {
+  margin-left:1px
+}
+.header-right {
+  display:flex;
+  align-items:center;
+  gap:15px;
+  min-height:44px
+}
+.credit {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:2px
+}
+.mode-tag {
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#596451;
+  font-weight:550;
+  white-space:nowrap
+}
+.mode-tag:before {
+  content:"";
+  display:block;
+  width:6px;
+  height:6px;
+  background:#98a486;
+  border-radius:50%
+}
+.mode-tag.live:before {
+  background:#4b7c50
+}
+.icon-button {
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:transparent;
+  color:#78806f
+}
+.icon-button:hover {
+  background:#e9ede2;
+  color:var(--ink)
+}
+main {
+  display:grid;
+  min-width:0;
+  align-items:center
+}
+.screen {
+  width:100%;
+  min-height:0;
+  text-align:center;
+  align-self:center;
+  padding:30px 0 42px;
+  animation:arrive .36s cubic-bezier(.2,.7,.2,1)
+}
+.intro-content {
+  display:flex;
+  flex-direction:column;
+  align-items:center
+}
+.intro-art {
+  width:180px;
+  height:180px;
+  position:relative;
+  margin:0 auto 32px
+}
+.face {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:29px;
+  position:absolute;
+  inset:0;
+  background:var(--accent);
+  border-radius:50%;
+  transition:background .4s,transform .4s
+}
+.intro-art .face {
+  transform:rotate(-9deg)
+}
+.face .eye {
+  display:block;
+  background:var(--ink);
+  width:17px;
+  height:49px;
+  border-radius:20px;
+  transition:height .3s,width .3s,transform .3s;
+  transform-origin:50% 65%
+}
+.intro-art .eye {
+  animation:blink 7s infinite
+}
+.intro-art .eye:nth-child(2) {
+  animation-delay:.025s
+}
+.intro-art:after {
+  content:"";
+  width:29px;
+  height:29px;
+  position:absolute;
+  top:8px;
+  right:-5px;
+  border-radius:50%;
+  background:var(--bg);
+  border:5px solid var(--bg);
+  box-shadow:inset 0 0 0 2px #b5c383
+}
+.intro h1 {
+  font-size:clamp(42px,4.5vw,64px);
+  font-weight:800;
+  line-height:1.23;
+  letter-spacing:-.065em
+}
+.intro h1 span {
+  display:block
+}
+.subtitle {
+  margin-top:20px;
+  font-size:16px;
+  color:var(--muted);
+  line-height:1.7;
+  word-break:keep-all
+}
+.primary {
+  min-height:60px;
+  min-width:236px;
+  border-radius:100px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:30px;
+  padding:15px 29px;
+  background:var(--ink);
+  color:#fff;
+  font-size:16px;
+  font-weight:650;
+  letter-spacing:-.02em
+}
+.primary:hover {
+  background:#414c3c;
+  box-shadow:0 6px 18px #262e2910
+}
+.primary svg {
+  width:19px;
+  height:19px
+}
+.intro .primary {
+  margin-top:32px
+}
+.intro-note {
+  margin-top:16px;
+  font-size:12px;
+  line-height:1.6;
+  color:var(--muted)
+}
+.footer {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding-bottom:12px;
+  min-height:0
+}
+.footer-note {
+  font-size:11px;
+  color:#7b8275;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  line-height:1.65;
+  text-align:center;
+  word-break:keep-all
+}
+.footer-note svg {
+  width:13px;
+  height:13px
+}
+.monitor {
+  padding-top:21px;
+  padding-bottom:30px
+}
+.visual {
+  width:282px;
+  height:282px;
+  margin:0 auto 32px;
+  position:relative
+}
+.visual .orb {
+  position:absolute;
+  inset:17px;
+  border-radius:50%;
+  isolation:isolate;
+  overflow:hidden;
+  background:var(--accent)
+}
+.visual .face {
+  border-radius:50%;
+  gap:41px;
+  transition:opacity .3s,background .3s,transform .3s
+}
+.visual .eye {
+  height:68px;
+  width:23px
+}
+.visual .camera-video {
+  width:100%;
+  height:100%;
+  position:absolute;
+  inset:0;
+  object-fit:cover;
+  transform:scaleX(-1);
+  z-index:2;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+  background:#273127
+}
+.visual[data-preview=true] .camera-video {
+  opacity:1
+}
+.visual[data-preview=true] .face {
+  opacity:0
+}
+.visual .camera-label {
+  position:absolute;
+  z-index:3;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#172017aa;
+  backdrop-filter:blur(6px);
+  color:#fff;
+  font-size:10px;
+  padding:5px 10px;
+  border-radius:30px;
+  white-space:nowrap;
+  opacity:0;
+  transition:opacity .2s
+}
+.visual[data-preview=true] .camera-label {
+  opacity:1
+}
+.progress-ring {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  transform:rotate(-90deg);
+  pointer-events:none
+}
+.progress-ring circle {
+  fill:none;
+  stroke-width:3;
+  stroke-linecap:round
+}
+.ring-track {
+  stroke:#e6e9df;
+  opacity:0;
+  transition:opacity .3s
+}
+.ring-fill {
+  stroke:#c38442;
+  stroke-dasharray:841.947;
+  stroke-dashoffset:841.947;
+  transition:stroke-dashoffset .12s linear;
+  opacity:0
+}
+.visual[data-kind=sleep] .ring-track,.visual[data-kind=sleep] .ring-fill {
+  opacity:1
+}
+.visual[data-kind=sleep] .face {
+  background:#f1dda2;
+  transform:rotate(9deg)
+}
+.visual[data-kind=sleep] .eye {
+  height:9px;
+  width:40px;
+  transform:translateY(14px)
+}
+.visual[data-kind=unknown] .face,.visual[data-kind=away] .face,.visual[data-kind=paused] .face {
+  background:#e8ece2
+}
+.visual[data-kind=unknown] .eye:nth-child(2) {
+  height:36px
+}
+.visual[data-kind=away] .eye {
+  width:13px;
+  height:13px;
+  opacity:.45
+}
+.visual[data-kind=paused] .eye {
+  height:44px;
+  width:14px
+}
+.visual[data-kind=preview] .face {
+  background:var(--accent)
+}
+.visual[data-kind=preview] .eye {
+  animation:blink 8s infinite
+}
+.monitor h2 {
+  font-size:clamp(31px,3.3vw,43px);
+  font-weight:750;
+  letter-spacing:-.055em;
+  line-height:1.3
+}
+.monitor .subtitle {
+  font-size:15px;
+  margin-top:13px;
+  min-height:26px
+}
+.live-detail {
+  height:33px;
+  margin-top:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  letter-spacing:0;
+  color:var(--muted);
+  gap:7px;
+  font-variant-numeric:tabular-nums
+}
+.live-detail svg {
+  width:14px;
+  height:14px
+}
+.sleep-readout {
+  font-size:17px;
+  color:#9d692e;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+  font-weight:650
+}
+.sleep-readout span {
+  font-size:12px;
+  font-weight:500;
+  color:#8d7b63;
+  margin-left:5px
+}
+.toolbar {
+  display:inline-flex;
+  align-items:center;
+  padding:6px;
+  background:#fff;
+  border:1px solid #e5e8df;
+  border-radius:100px;
+  box-shadow:0 6px 22px #1d2f1704;
+  margin:27px auto 0;
+  gap:2px
+}
+.toolbar button {
+  background:transparent;
+  min-height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:0 23px;
+  font-size:13px;
+  font-weight:550;
+  border-radius:80px;
+  white-space:nowrap
+}
+.toolbar button:hover {
+  background:#f0f3e9
+}
+.toolbar button[aria-pressed=true] {
+  background:var(--accent-soft);
+  color:#425930
+}
+.toolbar svg {
+  width:18px;
+  height:18px
+}
+.toolbar .divider {
+  width:1px;
+  height:18px;
+  background:var(--line);
+  margin:0 3px
+}
+.toolbar .end-button {
+  color:#7c8277;
+  padding:0 20px
+}
+.resume-primary {
+  margin:22px auto 0;
+  min-height:54px;
+  min-width:216px
+}
+.text-button {
+  background:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:8px 17px;
+  color:var(--muted);
+  font-size:13px
+}
+.text-button:hover {
+  color:var(--ink);
+  text-decoration:underline;
+  text-underline-offset:4px
+}
+.pause-actions {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px
+}
+.loading .intro-art {
+  width:142px;
+  height:142px
+}
+.loading h2,.error h2 {
+  font-size:34px;
+  font-weight:730;
+  line-height:1.35;
+  letter-spacing:-.045em
+}
+.loading .subtitle,.error .subtitle {
+  font-size:14px;
+  max-width:370px;
+  margin:16px auto 0
+}
+.loading .text-button {
+  margin-top:30px
+}
+.loading .face {
+  background:var(--accent-soft)
+}
+.loading .eye {
+  height:38px;
+  width:12px;
+  animation:blink 2s infinite
+}
+.error .intro-art {
+  width:142px;
+  height:142px
+}
+.error .face {
+  background:#ecefe5
+}
+.error .eye:nth-child(2) {
+  height:23px
+}
+.error .primary {
+  margin-top:28px
+}
+.error-actions {
+  display:flex;
+  flex-direction:column;
+  align-items:center
+}
+.alarm-screen .intro-art {
+  width:157px;
+  height:157px;
+  margin-bottom:28px
+}
+.alarm-screen .face {
+  background:#f3ae88;
+  transform:rotate(0deg);
+  gap:29px
+}
+.alarm-screen .eye {
+  height:57px;
+  width:22px;
+  animation:none
+}
+.alarm-screen .intro-art:after {
+  display:none
+}
+.alarm-screen h2 {
+  font-size:clamp(74px,9vw,108px);
+  font-weight:900;
+  line-height:1.16;
+  letter-spacing:-.075em
+}
+.alarm-screen .subtitle {
+  font-size:15px;
+  color:#815a46;
+  margin-top:16px
+}
+.alarm-screen .primary {
+  margin-top:35px;
+  min-width:235px
+}
+.alarm-actions {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px
+}
+.alarm-screen .text-button {
+  color:#815a46
+}
+.alarm-screen .alarm-tag {
+  font-size:11px;
+  color:#8d6249;
+  margin-bottom:17px;
+  letter-spacing:-.01em
+}
+body[data-screen=alarm] {
+  background:var(--alert)
+}
+body[data-screen=alarm] .brand-mark {
+  background:#f3ae88
+}
+body[data-screen=alarm] .footer-note {
+  color:#845e4b
+}
+body[data-screen=alarm] .credit {
+  color:#936851
+}
+dialog {
+  width:min(404px,calc(100% - 32px));
+  padding:30px;
+  border:1px solid #e4e7dc;
+  border-radius:28px;
+  background:#fcfdf9;
+  color:var(--ink);
+  box-shadow:0 24px 90px #17260e2a;
+  max-height:calc(100dvh - 32px);
+  overflow:auto;
+  overscroll-behavior:contain
+}
+dialog::backdrop {
+  background:#27302144;
+  backdrop-filter:blur(7px)
+}
+.settings-title {
+  font-size:24px;
+  font-weight:750;
+  letter-spacing:-.045em;
+  margin-bottom:28px
+}
+.setting-row {
+  margin-bottom:25px
+}
+.setting-label {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  min-height:34px;
+  font-size:14px;
+  font-weight:550
+}
+.setting-value {
+  font-size:18px;
+  font-weight:750;
+  font-variant-numeric:tabular-nums
+}
+.range {
+  width:100%;
+  height:30px;
+  cursor:pointer;
+  accent-color:#5c7537;
+  margin:12px 0 0;
+  display:block
+}
+.range-ends {
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  color:var(--muted);
+  padding:0 2px;
+  letter-spacing:0
+}
+.sound-setting {
+  padding-top:21px;
+  border-top:1px solid var(--line);
+  margin-bottom:21px
+}
+.switch {
+  display:inline-flex;
+  width:42px;
+  height:25px;
+  position:relative
+}
+.switch input {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  opacity:0;
+  cursor:pointer;
+  z-index:2
+}
+.switch-track {
+  width:100%;
+  height:100%;
+  background:#cdd3c6;
+  border-radius:30px;
+  transition:background .2s
+}
+.switch-track:after {
+  content:"";
+  width:19px;
+  height:19px;
+  position:absolute;
+  top:3px;
+  left:3px;
+  background:#fff;
+  border-radius:50%;
+  box-shadow:0 1px 3px #1b280917;
+  transition:transform .2s
+}
+.switch input:checked+.switch-track {
+  background:#627b3f
+}
+.switch input:checked+.switch-track:after {
+  transform:translateX(17px)
+}
+.switch input:focus-visible+.switch-track {
+  outline:3px solid #567543;
+  outline-offset:4px
+}
+.test-button {
+  background:#f0f3e7;
+  border:1px solid #e3e8d8;
+  width:100%;
+  min-height:45px;
+  border-radius:13px;
+  font-size:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px
+}
+.test-button:hover {
+  background:#e7edd9
+}
+.test-button svg {
+  width:16px;
+  height:16px
+}
+.settings-help {
+  font-size:11px;
+  line-height:1.9;
+  word-break:keep-all;
+  color:var(--muted);
+  margin:22px 0
+}
+.done-button {
+  min-height:49px;
+  width:100%;
+  min-width:0;
+  font-size:14px
+}
+.toast {
+  position:fixed;
+  z-index:30;
+  left:50%;
+  bottom:max(22px,env(safe-area-inset-bottom));
+  transform:translateX(-50%);
+  background:var(--ink);
+  color:white;
+  padding:12px 18px;
+  border-radius:14px;
+  font-size:12px;
+  line-height:1.75;
+  max-width:min(480px,calc(100% - 32px));
+  width:max-content;
+  box-shadow:0 8px 25px #17240d25;
+  text-align:center;
+  word-break:keep-all
+}
+.footer .sound-off {
+  margin-right:3px
+}
+.no-script {
+  padding:20px;
+  text-align:center
+}
+.screen[hidden] {
+  animation:none
+}
+@keyframes arrive {
+  from {
+    opacity:0;
+    transform:translateY(8px)
+  }
+  to {
+    opacity:1;
+    transform:translateY(0)
+  }
+}
+@keyframes blink {
+  0%,43%,47%,100% {
+    transform:scaleY(1)
+  }
+  45% {
+    transform:scaleY(.12)
+  }
+}
+@media(min-width:1550px) {
+  .app {
+    grid-template-rows:114px 1fr 76px
+  }
+  .intro-art {
+    width:195px;
+    height:195px;
+    margin-bottom:38px
+  }
+  .visual {
+    width:304px;
+    height:304px;
+    margin-bottom:38px
+  }
+  .screen {
+    padding-bottom:58px
+  }
+}
+@media(max-width:700px) {
+  .app {
+    width:calc(100% - 40px);
+    grid-template-rows:78px 1fr 58px
+  }
+  .brand {
+    font-size:23px;
+    gap:8px
+  }
+  .brand-mark {
+    width:29px;
+    height:29px;
+    border-radius:11px
+  }
+  .credit {
+    font-size:9px;
+    letter-spacing:1.6px
+  }
+  .header-right {
+    gap:10px
+  }
+  .mode-tag {
+    font-size:11px
+  }
+  .screen {
+    padding:20px 0 36px
+  }
+  .intro-art {
+    width:154px;
+    height:154px;
+    margin-bottom:31px
+  }
+  .intro-art .face {
+    gap:25px
+  }
+  .intro-art .eye {
+    height:44px;
+    width:15px
+  }
+  .intro-art:after {
+    width:26px;
+    height:26px;
+    right:-4px;
+    top:5px
+  }
+  .intro h1 {
+    font-size:45px;
+    line-height:1.28;
+    letter-spacing:-.065em
+  }
+  .subtitle {
+    font-size:14px;
+    margin-top:18px
+  }
+  .primary {
+    min-height:58px;
+    min-width:222px;
+    font-size:15px;
+    gap:30px
+  }
+  .intro .primary {
+    margin-top:29px
+  }
+  .intro-note {
+    font-size:11px;
+    margin-top:16px
+  }
+  .footer {
+    padding-bottom:6px
+  }
+  .footer-note {
+    font-size:10px
+  }
+  .visual {
+    width:247px;
+    height:247px;
+    margin-bottom:28px
+  }
+  .visual .orb {
+    inset:16px
+  }
+  .visual .face {
+    gap:34px
+  }
+  .visual .eye {
+    height:59px;
+    width:20px
+  }
+  .monitor h2 {
+    font-size:33px
+  }
+  .monitor .subtitle {
+    font-size:13px;
+    margin-top:13px
+  }
+  .live-detail {
+    margin-top:14px;
+    font-size:11px
+  }
+  .toolbar {
+    margin-top:24px;
+    padding:5px
+  }
+  .toolbar button {
+    font-size:12px;
+    padding:0 20px;
+    min-height:45px
+  }
+  .toolbar .end-button {
+    padding:0 18px
+  }
+  .toolbar svg {
+    width:17px;
+    height:17px
+  }
+  .alarm-screen .intro-art {
+    width:139px;
+    height:139px
+  }
+  .alarm-screen .eye {
+    width:18px;
+    height:51px
+  }
+  .alarm-screen h2 {
+    font-size:86px
+  }
+  .alarm-screen .subtitle {
+    font-size:13px
+  }
+  .alarm-screen .primary {
+    margin-top:29px
+  }
+  .settings-title {
+    font-size:23px
+  }
+  dialog {
+    padding:26px
+  }
+  .error h2,.loading h2 {
+    font-size:29px
+  }
+  .error .subtitle {
+    max-width:300px
+  }
+  .error .primary {
+    margin-top:27px
+  }
+}
+@media(max-height:730px) {
+  .app {
+    grid-template-rows:72px 1fr 50px
+  }
+  .screen {
+    padding:15px 0 24px
+  }
+  .intro-art {
+    width:135px;
+    height:135px;
+    margin-bottom:24px
+  }
+  .intro-art .eye {
+    width:14px;
+    height:40px
+  }
+  .intro h1 {
+    font-size:43px
+  }
+  .intro .subtitle {
+    margin-top:15px
+  }
+  .intro .primary {
+    margin-top:25px;
+    min-height:53px
+  }
+  .intro-note {
+    margin-top:12px
+  }
+  .visual {
+    width:219px;
+    height:219px;
+    margin-bottom:21px
+  }
+  .visual .eye {
+    height:52px;
+    width:18px
+  }
+  .visual .face {
+    gap:30px
+  }
+  .monitor h2 {
+    font-size:31px
+  }
+  .monitor .subtitle {
+    margin-top:10px
+  }
+  .live-detail {
+    margin-top:8px
+  }
+  .toolbar {
+    margin-top:18px
+  }
+  .alarm-screen .intro-art {
+    width:116px;
+    height:116px;
+    margin-bottom:20px
+  }
+  .alarm-screen .eye {
+    height:42px;
+    width:16px
+  }
+  .alarm-screen h2 {
+    font-size:77px
+  }
+  .alarm-screen .primary {
+    margin-top:24px;
+    min-height:54px
+  }
+  .alarm-screen .alarm-tag {
+    margin-bottom:11px
+  }
+}
+@media(max-height:600px) and (orientation:portrait) {
+  .visual {
+    width:195px;
+    height:195px;
+    margin-bottom:17px
+  }
+  .monitor .subtitle {
+    margin-top:8px
+  }
+  .live-detail {
+    margin-top:6px
+  }
+  .toolbar {
+    margin-top:15px
+  }
+  .screen {
+    padding-top:12px;
+    padding-bottom:20px
+  }
+  .intro-art {
+    width:122px;
+    height:122px
+  }
+}
+@media(max-width:350px) {
+  .app {
+    width:calc(100% - 32px)
+  }
+  .intro h1 {
+    font-size:40px
+  }
+  .subtitle {
+    font-size:12px
+  }
+  .header-right {
+    gap:3px
+  }
+  .brand {
+    font-size:22px
+  }
+  .monitor h2 {
+    font-size:28px
+  }
+  .monitor .subtitle {
+    font-size:12px
+  }
+  .visual {
+    width:min(210px,37svh);
+    height:min(210px,37svh)
+  }
+  .toolbar button {
+    padding:0 15px
+  }
+  .toolbar .end-button {
+    padding:0 13px
+  }
+}
+@media(max-height:500px) and (orientation:landscape) {
+  .app {
+    grid-template-rows:64px 1fr 45px
+  }
+  .screen {
+    padding:22px 0
+  }
+  .intro-art {
+    width:115px;
+    height:115px
+  }
+  .visual {
+    width:175px;
+    height:175px
+  }
+  .intro h1 {
+    font-size:36px
+  }
+  .intro h1 span {
+    display:inline
+  }
+  .intro h1 span+span {
+    margin-left:8px
+  }
+  .intro-art {
+    margin-bottom:20px
+  }
+  .screen {
+    padding-bottom:28px
+  }
+  .app {
+    min-height:580px
+  }
+}
+@media(max-height:600px) {
+  .alarm-screen .intro-art {
+    width:100px;
+    height:100px
+  }
+  .alarm-screen h2 {
+    font-size:70px
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*:before,*:after {
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important
+  }
+}
+
+/* Minimal additions: creator credit and a distinct visibility-check state. */
+.creator { margin-top:18px; font-size:12px; color:var(--muted); letter-spacing:.01em; }
+.visual[data-kind=check] .ring-track,.visual[data-kind=check] .ring-fill { opacity:1; }
+.visual[data-kind=check] .face { background:#f1dda2; }
+.visual[data-kind=check] .eye:nth-child(2) { height:32px; }
+.check-alarm h2 { font-size:clamp(46px,7vw,84px); }
+.camera-video { object-fit:contain; background:#253029; }
+@media(max-width:480px) { .creator {margin-top:14px; font-size:11px;} .monitor h2 { font-size:clamp(25px,6.8vw,33px); } }
+
+</style>
+</head>
+<body data-screen="intro">
+<noscript><p class="no-script">이 사이트를 사용하려면 브라우저에서 JavaScript를 켜 주세요.</p></noscript>
+<div class="app">
+<header class="header">
+<div aria-label="졸지마!" class="brand"><span aria-hidden="true" class="brand-mark"><i></i><i></i></span><span class="wordmark">졸지마<span>!</span></span></div>
+<div class="header-right"><span class="credit" id="credit">CODEMATE</span><span class="mode-tag" hidden="" id="modeTag">미리보기</span><button aria-label="알림 설정" class="icon-button" hidden="" id="settingsButton" title="알림 설정"><svg><use href="#i-settings"></use></svg></button></div>
+</header>
+<main id="main">
+<section aria-labelledby="introTitle" class="screen intro" id="introScreen">
+<div class="intro-content">
+<div aria-hidden="true" class="intro-art"><div class="face"><i class="eye"></i><i class="eye"></i></div></div>
+<h1 id="introTitle" tabindex="-1"><span>졸면,</span><span>깨워드릴게요.</span></h1>
+<p class="subtitle" id="introSubtitle">졸음이 5초 이어지면 알려드려요.</p>
+<button class="primary" id="startButton">시작하기<svg><use href="#i-arrow"></use></svg></button>
+<p class="intro-note" id="introNote">시작하면 카메라로 감지해요.</p>
+<p class="creator">made by 김민찬</p>
+</div>
+</section>
+<section aria-labelledby="monitorTitle" class="screen monitor" hidden="" id="monitorScreen">
+<div class="visual" data-kind="preview" data-preview="false" id="visual">
+<svg aria-hidden="true" class="progress-ring" viewBox="0 0 282 282"><circle class="ring-track" cx="141" cy="141" r="134"></circle><circle class="ring-fill" cx="141" cy="141" id="ringFill" r="134"></circle></svg>
+<div class="orb"><div aria-hidden="true" class="face"><i class="eye"></i><i class="eye"></i></div><video aria-hidden="true" aria-label="내 카메라 미리보기" autoplay="" class="camera-video" id="cameraVideo" muted="" playsinline=""></video><span aria-hidden="true" class="camera-label" id="cameraLabel">내 카메라</span></div>
+</div>
+<h2 aria-live="polite" id="monitorTitle" tabindex="-1">준비됐어요.</h2>
+<p class="subtitle" id="monitorSubtitle">카메라와 AI를 준비하고 있어요.</p>
+<div class="live-detail" id="liveDetail"><svg><use href="#i-clock"></use></svg><span id="delayLabel">5초 후 알림</span><span class="sleep-readout" hidden="" id="sleepReadout">0.0초<span>/ 5초</span></span></div>
+<div aria-label="감지 화면 제어" class="toolbar" id="toolbar" role="group"><button aria-label="카메라 미리보기 켜기" aria-pressed="false" id="cameraButton"><svg><use href="#i-camera"></use></svg><span id="cameraButtonLabel">카메라 보기</span></button><span aria-hidden="true" class="divider"></span><button class="end-button" id="endButton"><svg><use href="#i-stop"></use></svg>종료</button></div>
+<div class="pause-actions" hidden="" id="pauseActions"><button class="primary resume-primary" id="resumeButton">이어서 하기<svg><use href="#i-arrow"></use></svg></button><button class="text-button" id="pausedEndButton">종료하기</button></div>
+</section>
+<section aria-labelledby="loadingTitle" class="screen loading" hidden="" id="loadingScreen">
+<div aria-hidden="true" class="intro-art"><div class="face"><i class="eye"></i><i class="eye"></i></div></div>
+<h2 id="loadingTitle" tabindex="-1">잠시만요.</h2><p class="subtitle" id="loadingSubtitle" role="status">감지를 준비하고 있어요.</p><button class="text-button" id="cancelButton">취소</button>
+</section>
+<section aria-labelledby="errorTitle" class="screen error" hidden="" id="errorScreen">
+<div aria-hidden="true" class="intro-art"><div class="face"><i class="eye"></i><i class="eye"></i></div></div>
+<h2 id="errorTitle" tabindex="-1">시작하지 못했어요.</h2><p class="subtitle" id="errorMessage" role="alert">연결을 확인한 뒤 다시 시도해 주세요.</p><div class="error-actions"><button class="primary" id="retryButton">다시 시도<svg><use href="#i-arrow"></use></svg></button><button class="text-button" id="errorHomeButton">처음으로</button></div>
+</section>
+<section aria-labelledby="alarmTitle" class="screen alarm-screen" hidden="" id="alarmScreen">
+<div aria-hidden="true" class="intro-art"><div class="face"><i class="eye"></i><i class="eye"></i></div></div>
+<p class="alarm-tag" hidden="" id="alarmTag">알림 미리보기</p><h2 id="alarmTitle" tabindex="-1">일어나!</h2><p class="subtitle" id="alarmSubtitle">졸음 신호가 5초 동안 이어졌어요.</p><div class="alarm-actions"><button class="primary" id="awakeButton"><span id="awakeButtonLabel">깼어요</span><svg><use href="#i-check"></use></svg></button><button class="text-button" id="alarmEndButton">종료하기</button></div>
+</section>
+</main>
+<footer class="footer"><p class="footer-note" id="footerNote"><svg><use href="#i-shield"></use></svg><span id="footerText">영상은 저장하거나 전송하지 않아요.</span></p></footer>
+</div>
+<dialog aria-labelledby="settingsTitle" id="settingsDialog">
+<h2 class="settings-title" id="settingsTitle">알림 설정</h2>
+<div class="setting-row"><div class="setting-label"><label for="delayInput">몇 초 뒤 깨울까요?</label><output class="setting-value" for="delayInput" id="delayValue">5초</output></div><input aria-describedby="delayHelp" class="range" id="delayInput" max="30" min="2" step="1" type="range" value="5"/><div class="range-ends" id="delayHelp"><span>2초</span><span>30초</span></div></div>
+<div class="setting-row sound-setting"><div class="setting-label"><label for="soundInput">소리로 깨우기</label><span class="switch"><input checked="" id="soundInput" type="checkbox"/><span aria-hidden="true" class="switch-track"></span></span></div></div>
+<button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button>
+<p class="settings-help">이 화면을 열어 두고 사용해 주세요.<br/>눈 가림·자세 변화는 별도 확인 알림이에요.<br/>수면 진단·운전용이 아니에요.</p>
+<button class="primary done-button" id="settingsDone">완료</button>
+</dialog>
+<div class="toast" hidden="" id="toast" role="status"></div>
+<svg aria-hidden="true" height="0" style="position:absolute;width:0;height:0;top:0;left:0;overflow:hidden" width="0" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"></path></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><rect height="12" rx="3" width="13" x="3" y="6"></rect><path d="m16 10 5-3v10l-5-3"></path></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect height="12" rx="3" width="12" x="6" y="6"></rect></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 7v5l3 2"></path></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v5c0 5-8 10-8 10S4 16 4 11V6Z"></path><path d="m8 12 3 3 5-6"></path></symbol>
+<symbol id="i-volume" viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"></path></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h8m4 0h4M4 17h3m4 0h9"></path><circle cx="14" cy="7" r="2"></circle><circle cx="9" cy="17" r="2"></circle></symbol>
+</defs></svg>
+<script>
+'use strict';
+
+/** Public pretrained landmark models. These are NOT trained sleep classifiers. */
+const JOLJIMA_VISION = Object.freeze({
+  version: '0.10.35',
+  libraryUrl: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs',
+  wasmRoot: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm',
+  models: Object.freeze({
+    face: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+    pose: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
+    hand: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+  }),
+  delegate: 'CPU', // Worker CPU: does not require a discrete GPU.
+  preferWorker: true,
+  bodyIntervalMs: 250,
+  handIntervalMs: 250,
+  assetTimeoutMs: 45000,
+});
+const MIRROR_INPUT = true; // Preview only; analysis uses the entire, unmirrored frame.
+const JOLJIMA_LIMITS = Object.freeze({
+  sampleIntervalMs: 150,
+  maxFrameGapMs: 1500,
+  predictionTimeoutMs: 8000,
+  cameraTimeoutMs: 20000,
+  playbackTimeoutMs: 10000,
+  modelTimeoutMs: 120000,
+  cooldownMs: 2000,
+});
+
+</script>
+<script>
+'use strict';
+
+/** DOM이나 카메라 없이도 테스트할 수 있는 분류·시간·비동기 유틸리티. */
+const JoljimaCore = (() => {
+  const KINDS = new Set(['awake', 'sleep', 'check', 'away', 'unknown']);
+
+  class DrowsinessGate {
+    constructor(seconds = 5, maxGapMs = 1000) {
+      this.seconds = seconds;
+      this.maxGapMs = maxGapMs;
+      this.reset();
+    }
+
+    reset() {
+      this.lastAt = null;
+      this.lastKind = 'unknown';
+      this.lastReason = '';
+      this.sleepMs = 0;
+      this.fired = false;
+    }
+
+    observe(kind, now, reason = '') {
+      if (!Number.isFinite(now) || now < 0) {
+        this.reset();
+        return {
+          kind: 'unknown', sleepMs: 0, trigger: false
+        };
+      }
+      if (!KINDS.has(kind)) kind = 'unknown';
+      const gap = this.lastAt === null ? 0 : now - this.lastAt;
+      const continuous = this.lastAt !== null && gap >= 0 && gap <= this.maxGapMs;
+      const active = kind === 'sleep' || kind === 'check';
+      const sameSleep = active && this.lastKind === kind && this.lastReason === reason && continuous;
+      this.sleepMs = sameSleep ? this.sleepMs + gap : 0;
+      if (!sameSleep) this.fired = false;
+      const trigger = active && !this.fired && this.sleepMs >= this.seconds * 1000;
+      if (trigger) this.fired = true;
+      this.lastAt = now;
+      this.lastKind = kind;
+      this.lastReason = reason;
+      return {
+        kind, sleepMs: this.sleepMs, trigger
+      };
+    }
+  }
+
+  /** 배열 복사·정렬 없이 가장 높은 유효 분류 점수를 한 번에 찾습니다. */
+  function classifyPredictions(predictions, names, threshold = 0.8) {
+    if (!Array.isArray(predictions)) return 'unknown';
+    let best = null;
+    for (const item of predictions) {
+      if (!item || typeof item.className !== 'string') continue;
+      const value = item.probability;
+      if (!Number.isFinite(value) || value < 0 || value > 1) continue;
+      if (!best || value > best.probability) best = item;
+    }
+    if (!best || best.probability < threshold) return 'unknown';
+    if (best.className === names.awake) return 'awake';
+    if (best.className === names.sleep) return 'sleep';
+    if (names.away && best.className === names.away) return 'away';
+    return 'unknown';
+  }
+
+  function normalizeSettings(saved) {
+    return {
+      seconds: Number.isInteger(saved?.seconds) && saved.seconds >= 2 && saved.seconds <= 30
+      ? saved.seconds : 5,
+      sound: typeof saved?.sound === 'boolean' ? saved.sound : true,
+    };
+  }
+
+  /** 각 키를 따로 읽어 새 설정이 손상되어도 기존 설정으로 복구합니다. */
+  function readSettings(storage, key, legacyKey) {
+    for (const candidate of [key, legacyKey]) {
+      try {
+        const raw = storage?.getItem(candidate);
+        if (raw === null || raw === undefined) continue;
+        const value = JSON.parse(raw);
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          const settings = normalizeSettings(value);
+          if (candidate !== key) {
+            try {
+              storage.setItem(key, JSON.stringify(settings));
+            } catch (_) {
+            }
+          }
+          return settings;
+        }
+      } catch (_) {
+        /* 저장 공간이 차단되어도 기본 기능은 작동합니다. */
+      }
+    }
+    return normalizeSettings(null);
+  }
+
+  function withTimeout(promise, milliseconds, message) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(message)), milliseconds);
+      Promise.resolve(promise).then(
+      value => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      error => {
+        clearTimeout(timer);
+        reject(error);
+      },
+      );
+    });
+  }
+
+  /**
+  * 화면 전환으로 이전 요청이 무효화되어도 실제 추론이 끝나기 전에는
+  * 다음 추론을 시작하지 않습니다. 타임아웃은 GPU 작업을 취소하지 않습니다.
+  */
+  class PredictionSlot {
+    constructor() {
+      this.pending = null;
+      this.startedAt = 0;
+    }
+    get busy() {
+      return this.pending !== null;
+    }
+
+    run(operation, now) {
+      if (this.pending) return null;
+      this.startedAt = now;
+      const task = Promise.resolve().then(operation);
+      this.pending = task;
+      const clear = () => {
+        if (this.pending === task) this.pending = null;
+      };
+      task.then(clear, clear);
+      return task;
+    }
+  }
+
+  /** TM 0.8.x의 로드된 모델과 테스트 대역을 모두 안전하게 정리합니다. */
+  function disposeModel(model) {
+    if (!model) return;
+    // 로드된 TM 모델의 LayersModel과 학습용 truncatedModel은 별개입니다.
+    const tensors = new Set([model.model, model.truncatedModel].filter(Boolean));
+    if (tensors.size) {
+      for (const tensor of tensors) {
+        try {
+          tensor.dispose?.();
+        } catch (_) {
+        }
+      }
+    } else {
+      try {
+        model.dispose?.();
+      } catch (_) {
+      }
+    }
+  }
+
+  return Object.freeze({
+    DrowsinessGate, classifyPredictions, normalizeSettings, readSettings,
+    withTimeout, PredictionSlot, disposeModel,
+  });
+})();
+
+</script>
+<script>
+'use strict';
+
+/**
+ * Geometric evidence, not a medical / behavioural classifier.
+ * All coordinates use real image aspect ratio. Unknown is never treated as asleep.
+ * Thresholds are engineering starting points, NOT externally validated accuracy.
+ */
+const JoljimaSignals = (() => {
+  const valid = p => !!p && Number.isFinite(p.x) && Number.isFinite(p.y);
+  const inFrame = p => valid(p) && p.x >= .015 && p.x <= .985 && p.y >= .015 && p.y <= .985;
+  const visible = (p, t = .55) => inFrame(p) && (p.visibility ?? 0) >= t && (p.presence ?? 1) >= t;
+  const point = (p, w, h) => ({ x: p.x * w, y: p.y * h, z: (p.z ?? 0) * w });
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+  const median = values => {
+    if (!values.length) return null;
+    const s = [...values].sort((a, b) => a - b);
+    return s[Math.floor(s.length / 2)];
+  };
+  const signal = (kind, reason, detail = {}) => ({ kind, reason, ...detail });
+
+  function eyeAspect(points, indexes, w, h) {
+    if (indexes.some(i => !inFrame(points[i]))) return null;
+    const p = indexes.map(i => point(points[i], w, h));
+    const width = distance(p[0], p[3]);
+    if (width < 7) return null;
+    return { width, ear: (distance(p[1], p[5]) + distance(p[2], p[4])) / (2 * width), center: mid(p[0], p[3]) };
+  }
+
+  function faceFeatures(raw, w, h) {
+    const p = raw.faceLandmarks?.[0];
+    if (!p || p.length < 468) return null;
+    const left = eyeAspect(p, [33, 160, 158, 133, 153, 144], w, h);
+    const right = eyeAspect(p, [362, 385, 387, 263, 373, 380], w, h);
+    if (!left || !right || !inFrame(p[1])) return null;
+    const span = distance(left.center, right.center);
+    if (span < 22) return null;
+    const shapes = Object.fromEntries((raw.faceBlendshapes?.[0]?.categories ?? []).map(v => [v.categoryName, v.score]));
+    const shapeL = shapes.eyeBlinkLeft;
+    const shapeR = shapes.eyeBlinkRight;
+    const roll = Math.abs(Math.atan2(right.center.y - left.center.y, Math.abs(right.center.x - left.center.x)) * 180 / Math.PI);
+    const zSkew = Math.abs((p[33].z ?? 0) - (p[263].z ?? 0)) * w / span;
+    const balance = Math.min(left.width, right.width) / Math.max(left.width, right.width);
+    // Oblique/near-profile eyes are explicitly not used for a sleep conclusion.
+    const reliable = roll < 60 && zSkew < .95 && balance > .52 &&
+      Number.isFinite(shapeL) && Number.isFinite(shapeR);
+    return {
+      left, right, span, roll, zSkew, balance, reliable,
+      nose: point(p[1], w, h), center: mid(left.center, right.center),
+      blinkL: shapeL ?? 0, blinkR: shapeR ?? 0,
+      ear: (left.ear + right.ear) / 2,
+    };
+  }
+
+  function bodyFeatures(raw, w, h) {
+    if ((raw.poseAgeMs ?? 0) > 450) return null;
+    const p = raw.poseLandmarks?.[0];
+    if (!p || p.length < 25) return null;
+    const shouldersGood = visible(p[11]) && visible(p[12]);
+    const anchors = [0, 11, 12, 23, 24].filter(i => visible(p[i]));
+    if (anchors.length < 2) return null;
+    const shoulders = shouldersGood ? mid(point(p[11], w, h), point(p[12], w, h)) : null;
+    const span = shouldersGood ? distance(point(p[11], w, h), point(p[12], w, h)) : 0;
+    const nose = visible(p[0], .45) ? point(p[0], w, h) : null;
+    const hipsGood = visible(p[23], .65) && visible(p[24], .65);
+    const hips = hipsGood ? mid(point(p[23], w, h), point(p[24], w, h)) : null;
+    const torso = shoulders && hips ? distance(shoulders, hips) : 0;
+    const lying = torso > 55 && shoulders && hips &&
+      Math.abs(hips.x - shoulders.x) > Math.abs(hips.y - shoulders.y) * 1.7;
+    const headRise = shoulders && nose && span > 45 ? (shoulders.y - nose.y) / span : null;
+    const eyeAnchors = visible(p[2], .35) && visible(p[5], .35)
+      ? [point(p[2], w, h), point(p[5], w, h)] : null;
+    return { p, shoulders, span, nose, hips, lying: !!lying, headRise, eyeAnchors, solid: shouldersGood && span > 45 };
+  }
+
+  function pointSegmentDistance(p, a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const d = dx * dx + dy * dy;
+    const t = d ? clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / d, 0, 1) : 0;
+    return distance(p, { x: a.x + t * dx, y: a.y + t * dy });
+  }
+  function hull(points) {
+    const pts = [...points].sort((a, b) => a.x - b.x || a.y - b.y);
+    const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    const lower = [], upper = [];
+    for (const p of pts) { while (lower.length >= 2 && cross(lower.at(-2), lower.at(-1), p) <= 0) lower.pop(); lower.push(p); }
+    for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (upper.length >= 2 && cross(upper.at(-2), upper.at(-1), p) <= 0) upper.pop(); upper.push(p); }
+    lower.pop(); upper.pop();
+    return [...lower, ...upper];
+  }
+  function insideOrNear(p, polygon, margin) {
+    if (polygon.length < 3) return false;
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const a = polygon[i], b = polygon[j];
+      if (pointSegmentDistance(p, a, b) <= margin) return true;
+      if ((a.y > p.y) !== (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+    }
+    return inside;
+  }
+
+  /** A hand projected over an eye is a visibility check, NEVER proof of sleeping. */
+  function eyeOcclusion(raw, face, body, w, h) {
+    if ((raw.handAgeMs ?? 0) > 450) return false;
+    let eyes = face ? [face.left.center, face.right.center] : body?.eyeAnchors;
+    if (!eyes || distance(eyes[0], eyes[1]) < 12) return false;
+    const span = distance(eyes[0], eyes[1]);
+    for (const hand of raw.handLandmarks ?? []) {
+      if (!Array.isArray(hand) || hand.filter(inFrame).length < 12) continue;
+      const polygon = hull(hand.filter(inFrame).map(p => point(p, w, h)));
+      const bounds = polygon.reduce((r, p) => ({ minX: Math.min(r.minX, p.x), maxX: Math.max(r.maxX, p.x), minY: Math.min(r.minY, p.y), maxY: Math.max(r.maxY, p.y) }), { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+      if (Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY) < span * .35) continue;
+      if (eyes.some(p => insideOrNear(p, polygon, span * .12))) return true;
+    }
+    return false;
+  }
+
+  class Analyzer {
+    constructor() { this.reset(); }
+    reset() {
+      this.startedAt = null;
+      this.openSamples = [];
+      this.riseSamples = [];
+      this.openReference = null;
+      this.riseReference = null;
+      this.calibrationDone = false;
+      this.lastAt = null;
+    }
+    analyze(raw, now) {
+      if (!raw || !Number.isFinite(now) || now < 0) return signal('unknown', 'unavailable');
+      if (this.lastAt !== null && now <= this.lastAt) return signal('unknown', 'stale');
+      this.lastAt = now;
+      if (this.startedAt === null) this.startedAt = now;
+      const w = raw.width || 640, h = raw.height || 480;
+      if ((raw.faceLandmarks?.length ?? 0) > 1 || (raw.poseLandmarks?.length ?? 0) > 1) return signal('unknown', 'multiple');
+      if (raw.quality && raw.quality.mean < 18) return signal('unknown', 'dark');
+      const face = faceFeatures(raw, w, h);
+      const body = bodyFeatures(raw, w, h);
+      const covered = eyeOcclusion(raw, face, body, w, h);
+      const clearOpen = face?.reliable && face.blinkL < .22 && face.blinkR < .22 && face.ear > .105 && face.ear < .5 && !covered;
+      if (!this.calibrationDone) {
+        if (clearOpen) {
+          this.openSamples.push(face.ear);
+          if (body?.headRise > .2 && body.headRise < 1.5) this.riseSamples.push(body.headRise);
+        }
+        const elapsed = now - this.startedAt;
+        if ((this.openSamples.length >= 12 && elapsed >= 1800) || elapsed >= 6000) {
+          this.openReference = this.openSamples.length >= 6 ? clamp(median(this.openSamples), .13, .38) : .27;
+          this.riseReference = this.riseSamples.length >= 4 ? median(this.riseSamples) : null;
+          this.calibrationDone = true;
+          this.openSamples.length = this.riseSamples.length = 0;
+        } else return signal('unknown', 'calibrating');
+      }
+      if (covered) return signal('check', 'covered');
+      if (face?.reliable) {
+        const closedEar = clamp(this.openReference * .60, .075, .205);
+        const softEar = clamp(this.openReference * .82, .11, .26);
+        const closed = (face.blinkL >= .55 && face.blinkR >= .55 && face.ear < softEar) ||
+          (face.left.ear < closedEar && face.right.ear < closedEar && face.blinkL > .28 && face.blinkR > .28);
+        if (closed) return signal('sleep', 'eyes_closed');
+      }
+      if (body?.lying) return signal('check', 'lying');
+      if (body?.solid && body.headRise !== null) {
+        const drop = this.riseReference !== null ? this.riseReference - body.headRise : 0;
+        // Normal reading / a small nod must not be equated with sleeping.
+        const extreme = body.headRise < -.04 || (body.headRise < .12 && drop > .30);
+        if (extreme) return signal('check', 'head_down');
+      }
+      if (face?.reliable) {
+        const open = face.blinkL < .45 && face.blinkR < .45 && face.ear > this.openReference * .67;
+        return open ? signal('awake', 'eyes_open') : signal('unknown', 'unclear_eyes');
+      }
+      if (face) return signal('check', 'angle');
+      if (body?.solid) return signal('check', 'face_hidden');
+      return signal('away', 'not_found');
+    }
+  }
+  return Object.freeze({ Analyzer, faceFeatures, bodyFeatures, eyeOcclusion, eyeAspect, median });
+})();
+
+</script>
+<script>
+'use strict';
+
+/**
+ * This function is also serialized into a classic Worker. Keep it self-contained.
+ * MediaPipe runs locally; only model/SDK downloads go over the network.
+ */
+async function JoljimaVisionRuntime(config, progress = () => {}, externalSignal = null) {
+  const tasks = [];
+  let face, pose, hand;
+  let latestPose = null, latestHand = null;
+  let poseAt = -Infinity, handAt = -Infinity, lastAt = -Infinity;
+  let closed = false;
+  const makeCanvas = () => typeof OffscreenCanvas !== 'undefined'
+    ? new OffscreenCanvas(24, 18) : Object.assign(document.createElement('canvas'), { width: 24, height: 18 });
+  const qualityCanvas = makeCanvas();
+  const qualityContext = qualityCanvas.getContext('2d', { willReadFrequently: true });
+  const abort = new AbortController();
+  const dispose = () => {
+    closed = true;
+    abort.abort();
+    externalSignal?.removeEventListener('abort', dispose);
+    for (const task of tasks) { try { task.close(); } catch (_) {} }
+    tasks.length = 0;
+  };
+  externalSignal?.addEventListener('abort', dispose, { once: true });
+  if (externalSignal?.aborted) dispose();
+  async function modelBuffer(url) {
+    if (closed) throw new Error('AI 연결이 취소됐어요.');
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    abort.signal.addEventListener('abort', cancel, { once: true });
+    const timer = setTimeout(cancel, config.assetTimeoutMs);
+    try {
+      const response = await fetch(url, { signal: controller.signal, credentials: 'omit', cache: 'default', referrerPolicy: 'no-referrer' });
+      if (!response.ok) throw new Error('모델 파일을 받지 못했어요. HTTP ' + response.status);
+      const size = Number(response.headers.get('content-length'));
+      if (size > 64 * 1024 * 1024) throw new Error('모델 파일 크기가 예상 범위를 벗어났어요.');
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength < 1024 || buffer.byteLength > 64 * 1024 * 1024) throw new Error('모델 파일 형식을 확인해 주세요.');
+      return new Uint8Array(buffer);
+    } finally {
+      clearTimeout(timer);
+      abort.signal.removeEventListener('abort', cancel);
+    }
+  }
+  try {
+    progress('AI 실행 도구를 불러오고 있어요.');
+    if (closed) throw new Error('AI 연결이 취소됐어요.');
+    const library = await import(config.libraryUrl);
+    if (closed) throw new Error('AI 연결이 취소됐어요.');
+    const wasm = await library.FilesetResolver.forVisionTasks(config.wasmRoot);
+    const entries = [
+      ['face', library.FaceLandmarker, { numFaces: 2, outputFaceBlendshapes: true,
+        minFaceDetectionConfidence: .55, minFacePresenceConfidence: .6, minTrackingConfidence: .55 }, '얼굴 모델을 준비하고 있어요. 1 / 3'],
+      ['pose', library.PoseLandmarker, { numPoses: 2, outputSegmentationMasks: false,
+        minPoseDetectionConfidence: .55, minPosePresenceConfidence: .6, minTrackingConfidence: .55 }, '몸 자세 모델을 준비하고 있어요. 2 / 3'],
+      ['hand', library.HandLandmarker, { numHands: 2,
+        minHandDetectionConfidence: .55, minHandPresenceConfidence: .6, minTrackingConfidence: .55 }, '손 모델을 준비하고 있어요. 3 / 3'],
+    ];
+    for (const [key, Constructor, options, message] of entries) {
+      if (closed) throw new Error('모델 연결이 취소됐어요.');
+      progress(message);
+      const buffer = await modelBuffer(config.models[key]);
+      const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
+      const task = await Constructor.createFromOptions(wasm, {
+        ...options, canvas, runningMode: 'VIDEO',
+        baseOptions: { modelAssetBuffer: buffer, delegate: config.delegate },
+      });
+      if (closed) { task.close(); throw new Error('AI 연결이 취소됐어요.'); }
+      tasks.push(task);
+      if (key === 'face') face = task;
+      if (key === 'pose') pose = task;
+      if (key === 'hand') hand = task;
+    }
+  } catch (error) { dispose(); throw error; }
+
+  function detect(frame, at) {
+    if (closed) throw new Error('AI 분석기가 종료됐어요.');
+    if (!Number.isFinite(at) || at <= lastAt) throw new Error('프레임 시간이 올바르지 않아요.');
+    lastAt = at;
+    const result = face.detectForVideo(frame, at);
+    if (at - poseAt >= config.bodyIntervalMs || !latestPose) {
+      latestPose = pose.detectForVideo(frame, at);
+      poseAt = at;
+    }
+    if (at - handAt >= config.handIntervalMs || !latestHand) {
+      latestHand = hand.detectForVideo(frame, at);
+      handAt = at;
+    }
+    let mean = 128;
+    if (qualityContext) {
+      qualityContext.drawImage(frame, 0, 0, 24, 18);
+      const pixels = qualityContext.getImageData(0, 0, 24, 18).data;
+      let sum = 0;
+      for (let i = 0; i < pixels.length; i += 4) sum += pixels[i] * .2126 + pixels[i + 1] * .7152 + pixels[i + 2] * .0722;
+      mean = sum / (pixels.length / 4);
+    }
+    return {
+      width: frame.width, height: frame.height, quality: { mean },
+      faceLandmarks: result.faceLandmarks ?? [], faceBlendshapes: result.faceBlendshapes ?? [],
+      poseLandmarks: latestPose?.landmarks ?? [], poseAgeMs: at - poseAt,
+      handLandmarks: latestHand?.landmarks ?? [], handAgeMs: at - handAt,
+    };
+  }
+  return { detect, close: dispose };
+}
+
+/** Worker transport. One frame at a time; no backlog of stale camera frames. */
+class JoljimaDetector {
+  constructor(config = JOLJIMA_VISION) {
+    const absolute = path => new URL(path, document.baseURI).href;
+    this.config = { ...config, libraryUrl: absolute(config.libraryUrl),
+      wasmRoot: absolute(config.wasmRoot),
+      models: Object.fromEntries(Object.entries(config.models).map(([key, path]) => [key, absolute(path)])) };
+    this.abort = new AbortController();
+    this.worker = null;
+    this.runtime = null;
+    this.pending = null;
+    this.sequence = 0;
+    this.closed = false;
+    this.analyzer = new JoljimaSignals.Analyzer();
+    this.mode = '';
+  }
+  async load(progress = () => {}) {
+    if (this.closed) throw new Error('AI 연결이 취소됐어요.');
+    if (this.config.preferWorker && typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined' && typeof createImageBitmap === 'function') {
+      try {
+        await this.loadWorker(progress);
+        this.mode = 'worker';
+        return this;
+      } catch (error) {
+        this.worker?.terminate();
+        this.worker = null;
+        if (this.closed) throw error;
+        console.warn('Worker unavailable; using the browser main-thread fallback.', error);
+        progress('이 브라우저에 맞는 실행 방식으로 다시 준비해요.');
+      }
+    }
+    const runtime = await JoljimaVisionRuntime(this.config, progress, this.abort.signal);
+    if (this.closed) { runtime.close(); throw new Error('AI 연결이 취소됐어요.'); }
+    this.runtime = runtime;
+    this.mode = 'main';
+    return this;
+  }
+  loadWorker(progress) {
+    const source = `const createRuntime = ${JoljimaVisionRuntime.toString()};
+let runtime = null, busy = false;
+self.onmessage = async ({data}) => {
+  if (data.type === 'init') {
+    try {
+      runtime = await createRuntime(data.config, text => self.postMessage({type:'progress',text}));
+      self.postMessage({type:'ready'});
+    } catch (error) { self.postMessage({type:'error',message:String(error.message || error)}); }
+  } else if (data.type === 'frame') {
+    try {
+      if (busy || !runtime) throw new Error('AI 분석 준비 상태를 확인해 주세요.');
+      busy = true;
+      const raw = runtime.detect(data.frame, data.at);
+      self.postMessage({type:'result',id:data.id,raw});
+    } catch (error) { self.postMessage({type:'error',id:data.id,message:String(error.message || error)}); }
+    finally { busy = false; data.frame?.close(); }
+  }
+};`;
+    const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+    return new Promise((resolve, reject) => {
+      let ready = false;
+      let settled = false;
+      let worker;
+      try { worker = new Worker(url); } // classic Worker permits the WASM loader's importScripts.
+      catch (error) { URL.revokeObjectURL(url); reject(error); return; }
+      this.worker = worker;
+      const timer = setTimeout(() => finish(new Error('AI 모델 다운로드가 지연돼요. 연결을 확인해 주세요.')), JOLJIMA_LIMITS.modelTimeoutMs - 2000);
+      const finish = error => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        URL.revokeObjectURL(url);
+        this.cancelLoad = null;
+        if (error) reject(error); else resolve();
+      };
+      this.cancelLoad = () => finish(new Error('AI 연결이 취소됐어요.'));
+      worker.onmessage = ({ data }) => {
+        if (data.type === 'progress') { if (!this.closed) progress(data.text); return; }
+        if (data.type === 'ready') { ready = true; finish(); return; }
+        if (data.type === 'result') {
+          if (this.pending?.id === data.id) { const pending = this.pending; this.pending = null; pending.resolve(data.raw); }
+          return;
+        }
+        if (data.type === 'error') {
+          const error = new Error(data.message || 'AI 분석 중 문제가 발생했어요.');
+          if (!ready) finish(error);
+          if (this.pending && (data.id === undefined || this.pending.id === data.id)) {
+            const pending = this.pending; this.pending = null; pending.reject(error);
+          }
+        }
+      };
+      worker.onerror = event => {
+        event.preventDefault();
+        const error = new Error(event.message || '이 브라우저에서는 AI Worker를 시작하지 못했어요.');
+        if (!ready) finish(error);
+        if (this.pending) { const pending = this.pending; this.pending = null; pending.reject(error); }
+      };
+      worker.postMessage({ type: 'init', config: this.config });
+    });
+  }
+  async predict(canvas, at) {
+    if (this.closed) throw new Error('AI 분석기가 종료됐어요.');
+    let raw;
+    if (this.worker) {
+      if (this.pending) throw new Error('이전 프레임을 분석하고 있어요.');
+      const frame = await createImageBitmap(canvas);
+      if (this.closed) { frame.close(); throw new Error('AI 분석기가 종료됐어요.'); }
+      const id = ++this.sequence;
+      raw = await new Promise((resolve, reject) => {
+        this.pending = { id, resolve, reject };
+        try { this.worker.postMessage({ type: 'frame', id, frame, at }, [frame]); }
+        catch (error) { this.pending = null; frame.close(); reject(error); }
+      });
+    } else if (this.runtime) raw = this.runtime.detect(canvas, at);
+    else throw new Error('AI 모델이 연결되지 않았어요.');
+    return this.analyzer.analyze(raw, at);
+  }
+  resetSession() { this.analyzer.reset(); }
+  close() {
+    if (this.closed) return;
+    this.closed = true;
+    this.abort.abort();
+    this.cancelLoad?.();
+    this.worker?.terminate();
+    this.worker = null;
+    this.runtime?.close();
+    this.runtime = null;
+    if (this.pending) { const pending = this.pending; this.pending = null; pending.reject(new Error('AI 분석이 종료됐어요.')); }
+  }
+  dispose() { this.close(); }
+}
+
+</script>
+<script>
+'use strict';
+
+(() => {
+  const {
+    DrowsinessGate, readSettings, withTimeout,
+    PredictionSlot
+  } = JoljimaCore;
+  // DOM 참조는 최초 한 번만 수집합니다.
+  const elements = Object.fromEntries(
+  Array.from(document.querySelectorAll('[id]'), element => [element.id, element]),
+  );
+  const $ = id => elements[id];
+  const setText = (id, value) => {
+    if ($(id).textContent !== String(value)) $(id).textContent = String(value);
+  };
+  const show = (id, visible = true) => {
+    if ($(id).hidden === visible) $(id).hidden = !visible;
+  };
+  const storageKey = 'joljima.simple.settings.v1';
+  let storage = null;
+  try {
+    storage = window.localStorage;
+  } catch (_) {
+  }
+  const settings = readSettings(storage, storageKey, 'jajima.simple.settings.v1');
+  const app = {
+    screen: 'intro', live: true, session: 0, cameraRequest: 0,
+    stream: null, model: null, modelPromise: null, cameraVisible: false,
+    paused: false, panelOpen: false, frameId: 0, frameSerial: 0,
+    processedFrame: -1, lastFrameAt: 0, lastVideoTime: -1,
+    loopId: 0, runId: 0, cooldownUntil: 0, alarmTest: false,
+    toastId: 0, wakeLock: null, wakeVersion: 0, wakePending: false, audio: null,
+    modelVersion: 0, loadingModel: null, alarmReason: 'eyes_closed', lastObservation: null, trackCleanups: [], focusId: 0,
+    audioNodes: new Set(), alarmInterval: 0, soundTimeouts: new Set()
+  };
+  const gate = new DrowsinessGate(settings.seconds, JOLJIMA_LIMITS.maxFrameGapMs);
+  const predictions = new PredictionSlot();
+  // 미리보기에는 추론용 캔버스와 실행 라이브러리가 필요하지 않습니다.
+  let canvas = null;
+  let context = null;
+  const video = $('cameraVideo');
+  const dialog = $('settingsDialog');
+  const circleLength = 2 * Math.PI * 134;
+  const routes = {
+    intro: 'introScreen', monitor: 'monitorScreen', loading: 'loadingScreen', error: 'errorScreen', alarm: 'alarmScreen'
+  };
+  const headings = {
+    intro: 'introTitle', monitor: 'monitorTitle', loading: 'loadingTitle', error: 'errorTitle', alarm: 'alarmTitle'
+  };
+  const clockIcon = $('liveDetail').querySelector('svg');
+  const readoutValue = $('sleepReadout').firstChild;
+  const readoutLimit = $('sleepReadout').querySelector('span');
+  const messages = Object.freeze({
+    preview: ['준비됐어요.', '모델을 연결하면 감지가 시작돼요.'],
+    awake: ['눈을 뜨고 있어요.', '하던 일에 집중하세요. 졸면 깨워드릴게요.'],
+    sleep: ['눈 감김이 이어지고 있어요.', ''],
+    check: ['모습을 확인해 주세요.', ''],
+    away: ['사람을 찾고 있어요.', '모습이 보이면 다시 확인할게요.'],
+    unknown: ['모습을 확인하고 있어요.', '얼굴과 어깨가 보이게 앉아 주세요.'],
+    paused: ['잠시 멈췄어요.', '준비되면 다시 이어서 해요.'],
+  });
+  let renderKey = '';
+  let lastOffset = '';
+
+  // ── 설정 · 화면 갱신 ──────────────────────────────────────────
+  function saveSettings() {
+    try {
+      storage?.setItem(storageKey, JSON.stringify(settings));
+    } catch (_) {
+    }
+  }
+  function syncSettings() {
+    gate.seconds = settings.seconds;
+    $('delayInput').value = String(settings.seconds);
+    $('delayInput').setAttribute('aria-valuetext', settings.seconds + '초');
+    setText('delayValue', settings.seconds + '초');
+    $('soundInput').checked = settings.sound;
+    setText('introSubtitle', '졸음이 ' + settings.seconds + '초 이어지면 알려드려요.');
+    setText('delayLabel', settings.seconds + '초 후 알림' + (settings.sound ? '' : ' · 무음'));
+    setText('introNote', app.live ? '시작하면 카메라로 감지해요.' : '지금은 모델 연결 전 미리보기예요.');
+  }
+  function toast(message) {
+    clearTimeout(app.toastId);
+    setText('toast', message);
+    show('toast');
+    app.toastId = setTimeout(() => show('toast', false), 4500);
+  }
+  function setScreen(name, focus = true) {
+    app.screen = name;
+    document.body.dataset.screen = name;
+    for (const [key, id] of Object.entries(routes)) show(id, key === name);
+    const monitor = name === 'monitor';
+    show('credit', !monitor);
+    show('modeTag', monitor);
+    show('settingsButton', monitor && !app.paused);
+    setText('modeTag', app.paused ? '일시 정지' : app.live ? '감지 중' : '미리보기');
+    $('modeTag').classList.toggle('live', app.live && !app.paused);
+    let footer = '영상은 저장하거나 전송하지 않아요.';
+    if (monitor) footer = app.paused ? '잠시 멈춘 동안에는 카메라도 꺼져 있어요.' : app.live ? '감지하려면 이 화면을 열어 두세요.' : '영상은 저장하거나 전송하지 않아요.';
+    if (name === 'alarm') footer = settings.sound ? '버튼을 누르면 알림이 멈춰요.' : '소리 없이 화면으로 알리고 있어요.';
+    setText('footerText', footer);
+    cancelAnimationFrame(app.focusId);
+    if (focus) app.focusId = requestAnimationFrame(() => {
+      app.focusId = 0;
+      if (app.screen === name && !document.hidden) $(headings[name]).focus({
+        preventScroll: true
+      });
+    });
+  }
+  function renderState(kind, ms = 0, reason = '') {
+    if (!Object.hasOwn(messages, kind)) kind = 'unknown';
+    const key = `${kind}:${reason}:${settings.seconds}:${app.cameraVisible}`;
+    const sleeping = kind === 'sleep' || kind === 'check';
+    if (renderKey !== key) {
+      renderKey = key;
+      $('visual').dataset.kind = kind;
+      let [title, base] = messages[kind];
+      const details = {
+        calibrating: ['정면을 잠깐 봐 주세요.', '눈을 뜬 기준을 맞추고 있어요.'],
+        dark: ['화면이 너무 어두워요.', '조명을 켜고 카메라가 가려졌는지 확인해 주세요.'],
+        multiple: ['한 사람만 보여 주세요.', '여러 사람이 보이면 판단을 멈춰요.'],
+        unclear_eyes: ['눈을 확인하고 있어요.', '정면에서 눈이 잘 보이게 해 주세요.'],
+        covered: ['눈이 잘 안 보여요.', ''],
+        lying: ['누운 자세로 보여요.', ''],
+        head_down: ['고개가 많이 내려갔어요.', ''],
+        face_hidden: ['얼굴을 확인할 수 없어요.', ''],
+        angle: ['정면에서 확인해 주세요.', ''],
+      };
+      if (details[reason]) [title, base] = details[reason];
+      const sub = sleeping
+      ? settings.seconds + (kind === 'sleep' ? '초가 되면 깨워드릴게요.' : '초 이어지면 확인 알림을 드려요.')
+      : kind === 'preview' && app.cameraVisible ? '카메라 화면만 확인하고 있어요.' : base;
+      setText('monitorTitle', title);
+      setText('monitorSubtitle', sub);
+      show('delayLabel', !sleeping && kind !== 'paused');
+      clockIcon.style.display = sleeping || kind === 'paused' ? 'none' : '';
+      show('sleepReadout', sleeping);
+      readoutLimit.textContent = '/ ' + settings.seconds + '초';
+    }
+    const elapsed = sleeping ? Math.min(Math.max(ms, 0), settings.seconds * 1000) : 0;
+    if (sleeping) {
+      const value = (elapsed / 1000).toFixed(1) + '초';
+      if (readoutValue.nodeValue !== value) readoutValue.nodeValue = value;
+    }
+    const offset = (circleLength * (1 - elapsed / (settings.seconds * 1000))).toFixed(3);
+    if (lastOffset !== offset) {
+      $('ringFill').style.strokeDashoffset = offset;
+      lastOffset = offset;
+    }
+  }
+  function cameraUI(visible) {
+    app.cameraVisible = visible;
+    $('visual').dataset.preview = String(visible);
+    video.setAttribute('aria-hidden', String(!visible));
+    $('cameraButton').setAttribute('aria-pressed', String(visible));
+    $('cameraButton').setAttribute('aria-label', visible ? (app.live ? '카메라 미리보기 숨기기. 감지는 계속돼요.' : '카메라 미리보기 끄기') : '카메라 미리보기 켜기');
+    $('cameraButton').title = visible && app.live ? '화면만 숨기고 감지는 계속해요.' : '';
+    setText('cameraButtonLabel', visible ? '화면 숨기기' : '카메라 보기');
+    setText('cameraLabel', app.live ? '내 카메라' : '미리보기 · 분석 안 함');
+    if (!app.live && app.screen === 'monitor' && !app.paused) renderState('preview');
+  }
+  // ── 카메라 수명과 새 프레임 추적 ──────────────────────────────
+  function stopFrameWatch() {
+    if (app.frameId && video.cancelVideoFrameCallback) {
+      try {
+        video.cancelVideoFrameCallback(app.frameId);
+      } catch (_) {
+      }
+    }
+    app.frameId = 0;
+  }
+  function watchFrames() {
+    stopFrameWatch();
+    app.frameSerial = 0;
+    app.processedFrame = -1;
+    app.lastVideoTime = -1;
+    app.lastFrameAt = performance.now();
+    if (!app.live || !video.requestVideoFrameCallback) return;
+    const stream = app.stream;
+    const request = app.cameraRequest;
+    const onFrame = (now) => {
+      if (app.stream !== stream || request !== app.cameraRequest || !stream) return;
+      app.frameSerial++;
+      app.lastFrameAt = now;
+      app.frameId = video.requestVideoFrameCallback(onFrame);
+    };
+    app.frameId = video.requestVideoFrameCallback(onFrame);
+  }
+  function stopCamera() {
+    app.cameraRequest++;
+    stopFrameWatch();
+    for (const cleanup of app.trackCleanups) cleanup();
+    app.trackCleanups.length = 0;
+    const stream = app.stream;
+    app.stream = null;
+    if (stream) stream.getTracks().forEach(track => track.stop());
+    video.pause();
+    video.srcObject = null;
+    cameraUI(false);
+    $('cameraButton').disabled = false;
+  }
+  function cameraError(error) {
+    const descriptions = {
+      NotAllowedError: '카메라 권한을 허용한 뒤 다시 시작해 주세요.',
+      NotFoundError: '연결된 카메라를 찾지 못했어요.',
+      NotReadableError: '다른 앱에서 카메라를 사용 중인지 확인해 주세요.',
+      SecurityError: '카메라를 사용하려면 HTTPS 또는 localhost에서 열어 주세요.'
+    };
+    return descriptions[error && error.name] || (error && error.message) || '카메라를 연결하지 못했어요.';
+  }
+  async function ensureCamera(session) {
+    if (app.stream && app.stream.getVideoTracks().some(track => track.readyState === 'live')) return;
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      throw new Error('카메라를 사용하려면 HTTPS 또는 localhost에서 열어 주세요.');
+    }
+    const requestId = ++app.cameraRequest;
+    const cancelled = () => session !== app.session || requestId !== app.cameraRequest || document.hidden;
+    let expired = false;
+    let acquired = null;
+    const request = navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: {
+        facingMode: 'user', width: {
+          ideal: 640
+        }, height: {
+          ideal: 480
+        },
+        frameRate: {
+          ideal: 20, max: 30
+        },
+      },
+    }).then(stream => {
+      // 권한 요청은 취소할 수 없으므로 늦게 도착한 스트림도 바로 닫습니다.
+      if (expired || cancelled()) {
+        stream.getTracks().forEach(track => track.stop());
+        throw new Error('카메라 요청이 취소됐어요.');
+      }
+      acquired = stream;
+      return stream;
+    });
+    try {
+      const stream = await withTimeout(request, JOLJIMA_LIMITS.cameraTimeoutMs,
+      '카메라 권한 응답을 기다리다 멈췄어요. 권한을 확인해 주세요.');
+      if (cancelled()) throw new Error('카메라 요청이 취소됐어요.');
+      app.stream = stream;
+      video.srcObject = stream;
+      video.muted = true;
+      await withTimeout(video.play(), JOLJIMA_LIMITS.playbackTimeoutMs,
+      '카메라 화면을 재생하지 못했어요. 다시 시도해 주세요.');
+      if (cancelled()) throw new Error('카메라 요청이 취소됐어요.');
+      watchFrames();
+      for (const track of stream.getVideoTracks()) {
+        const ended = () => {
+          if (app.stream !== stream) return;
+          if (app.live && ['monitor', 'alarm'].includes(app.screen)) {
+            pauseSession();
+            toast('카메라 연결이 끊겼어요. 연결 후 이어서 해 주세요.');
+          } else {
+            stopCamera();
+            gate.reset();
+            toast('카메라 연결이 끊겼어요.');
+          }
+        };
+        track.addEventListener('ended', ended, {
+          once: true
+        });
+        app.trackCleanups.push(() => track.removeEventListener('ended', ended));
+      }
+    } catch (error) {
+      expired = true;
+      if (requestId === app.cameraRequest) stopCamera();
+      if (acquired) acquired.getTracks().forEach(track => track.stop());
+      throw error;
+    }
+  }
+  async function toggleCamera() {
+    if (app.screen !== 'monitor' || app.paused || app.panelOpen || $('cameraButton').disabled) return;
+    if (app.cameraVisible) {
+      cameraUI(false);
+      // In real detection, hiding the preview never stops inference.
+      if (!app.live) stopCamera();
+      return;
+    }
+    const session = app.session;
+    $('cameraButton').disabled = true;
+    setText('cameraButtonLabel', '연결 중…');
+    try {
+      await ensureCamera(session);
+      if (session === app.session && app.screen === 'monitor' && !app.paused && !document.hidden && app.stream) cameraUI(true);
+    } catch (error) {
+      if (session === app.session && app.screen === 'monitor' && !app.paused) {
+        stopCamera();
+        toast(cameraError(error));
+      }
+    } finally {
+      if (session === app.session) {
+        $('cameraButton').disabled = false;
+        setText('cameraButtonLabel', app.cameraVisible ? '화면 숨기기' : '카메라 보기');
+      }
+    }
+  }
+
+  // ── 공개 모델 지연 로드 · 단일 추론 루프 ───────────────────
+  async function loadModel() {
+    if (app.model && !app.model.closed) return app.model;
+    if (app.modelPromise) return app.modelPromise;
+    const version = app.modelVersion;
+    const detector = new JoljimaDetector();
+    app.loadingModel = detector;
+    const task = (async () => {
+      try {
+        await withTimeout(detector.load(message => {
+          if (version === app.modelVersion && app.screen === 'loading') setText('loadingSubtitle', message);
+        }), JOLJIMA_LIMITS.modelTimeoutMs, '공개 모델을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
+        if (version !== app.modelVersion || detector.closed) throw new Error('AI 연결이 취소됐어요.');
+        if (!canvas) {
+          canvas = document.createElement('canvas');
+          context = canvas.getContext('2d', { alpha: false });
+        }
+        if (!context) throw new Error('영상 분석을 시작할 수 없는 브라우저예요.');
+        app.model = detector;
+        app.loadingModel = null;
+        return detector;
+      } catch (error) {
+        detector.close();
+        if (app.loadingModel === detector) app.loadingModel = null;
+        throw error;
+      }
+    })();
+    app.modelPromise = task;
+    task.then(() => {
+      if (app.modelPromise === task) app.modelPromise = null;
+    }, () => {
+      if (app.modelPromise === task) app.modelPromise = null;
+    });
+    return task;
+  }
+  function releaseModel() {
+    app.modelVersion++;
+    app.loadingModel?.close();
+    app.model?.close();
+    app.loadingModel = null;
+    app.model = null;
+    app.modelPromise = null;
+  }
+  function haltLoop() {
+    app.runId++;
+    clearTimeout(app.loopId);
+    app.loopId = 0;
+    gate.reset();
+  }
+  function startLoop() {
+    haltLoop();
+    if (!app.live || app.paused || app.panelOpen || app.screen !== 'monitor') return;
+    const run = app.runId;
+    const session = app.session;
+    const current = () => run === app.runId && session === app.session &&
+    app.screen === 'monitor' && !app.paused && !app.panelOpen && !document.hidden;
+    const schedule = (delay = JOLJIMA_LIMITS.sampleIntervalMs) => {
+      if (current()) app.loopId = setTimeout(tick, delay);
+    };
+    async function tick() {
+      app.loopId = 0;
+      if (!current()) return;
+      const now = performance.now();
+      // 이전 화면의 추론이 아직 끝나지 않았다면 겹쳐서 실행하지 않습니다.
+      if (predictions.busy) {
+        gate.reset();
+        if (now - predictions.startedAt >= JOLJIMA_LIMITS.predictionTimeoutMs) {
+          releaseModel();
+          pauseSession();
+          toast('AI 응답이 지연되고 있어요. 계속되면 새로고침해 주세요.');
+        } else schedule();
+        return;
+      }
+      if (!video.requestVideoFrameCallback && video.currentTime !== app.lastVideoTime) {
+        app.lastVideoTime = video.currentTime;
+        app.frameSerial++;
+        app.lastFrameAt = now;
+      }
+      const serial = app.frameSerial;
+      if (!app.stream || video.readyState < 2 || !video.videoWidth ||
+      serial === app.processedFrame || now - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs) {
+        if (now - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs) {
+          gate.reset();
+          renderState('unknown');
+        }
+        schedule();
+        return;
+      }
+      app.processedFrame = serial;
+      const capturedAt = now;
+      try {
+        // Preserve the WHOLE image: a square crop would remove shoulders/hands.
+        const scale = Math.min(1, 640 / video.videoWidth, 640 / video.videoHeight);
+        const width = Math.round(video.videoWidth * scale);
+        const height = Math.round(video.videoHeight * scale);
+        if (canvas.width !== width) canvas.width = width;
+        if (canvas.height !== height) canvas.height = height;
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        context.drawImage(video, 0, 0, width, height);
+        const task = predictions.run(() => app.model.predict(canvas, capturedAt), now);
+        const values = await withTimeout(task, JOLJIMA_LIMITS.predictionTimeoutMs, 'AI 응답 시간이 초과됐어요.');
+        if (!current()) return;
+        const ended = performance.now();
+        if (ended - capturedAt > JOLJIMA_LIMITS.maxFrameGapMs ||
+        ended - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs || ended < app.cooldownUntil) {
+          gate.reset();
+          renderState('unknown');
+        } else {
+          // 추론 완료 시각 대신 실제 입력을 읽은 시각으로 연속 시간을 계산합니다.
+          app.lastObservation = values;
+          const result = gate.observe(values.kind, capturedAt, values.reason);
+          renderState(result.kind, result.sleepMs, values.reason);
+          if (result.trigger) {
+            beginAlarm(false, values.reason);
+            return;
+          }
+        }
+      } catch (error) {
+        if (current()) {
+          releaseModel();
+          pauseSession();
+          toast('AI 판단이 멈췄어요. 이어서 하기를 눌러 다시 시도해 주세요.');
+        }
+        return;
+      }
+      schedule(Math.max(0, JOLJIMA_LIMITS.sampleIntervalMs - (performance.now() - now)));
+    }
+    tick();
+  }
+  // ── 화면 잠금 방지 · 알림 소리 ────────────────────────────────
+  async function requestWakeLock() {
+    if (!app.live || !navigator.wakeLock || document.hidden || app.wakeLock || app.wakePending) return;
+    const version = ++app.wakeVersion;
+    app.wakePending = true;
+    try {
+      const lock = await navigator.wakeLock.request('screen');
+      if (version !== app.wakeVersion || document.hidden ||
+      !['monitor', 'alarm'].includes(app.screen) || app.paused) {
+        await lock.release();
+        return;
+      }
+      app.wakeLock = lock;
+      lock.addEventListener('release', () => {
+        if (app.wakeLock === lock) app.wakeLock = null;
+      }, {
+        once: true
+      });
+    } catch (_) {
+      /* 선택 기능이므로 지원하지 않아도 감지는 계속합니다. */
+    }
+    finally {
+      if (version === app.wakeVersion) app.wakePending = false;
+    }
+  }
+  function releaseWakeLock() {
+    app.wakeVersion++;
+    app.wakePending = false;
+    const lock = app.wakeLock;
+    app.wakeLock = null;
+    if (lock) lock.release().catch(() => {
+    });
+  }
+  function primeAudio() {
+    if (!settings.sound) return;
+    try {
+      if (!app.audio) {
+        const Audio = window.AudioContext || window.webkitAudioContext;
+        if (Audio) app.audio = new Audio();
+      }
+      if (app.audio && app.audio.state === 'suspended') app.audio.resume().catch(() => {
+      });
+    } catch (_) {
+    }
+  }
+  function stopAudio() {
+    clearInterval(app.alarmInterval);
+    app.alarmInterval = 0;
+    for (const timer of app.soundTimeouts) clearTimeout(timer);
+    app.soundTimeouts.clear();
+    try {
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+    } catch (_) {
+    }
+    for (const tone of app.audioNodes) {
+      try {
+        tone.oscillator.stop();
+      } catch (_) {
+      }
+      tone.oscillator.disconnect();
+      tone.gain.disconnect();
+    }
+    app.audioNodes.clear();
+  }
+  function alarmSound() {
+    if (!settings.sound || app.screen !== 'alarm' || document.hidden) return;
+    primeAudio();
+    try {
+      const audio = app.audio;
+      if (audio && audio.state === 'running') {
+        [0, .23, .46].forEach((offset, index) => {
+          const oscillator = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime + offset;
+          oscillator.type = 'sine';
+          oscillator.frequency.value = index === 1 ? 1046.5 : 880;
+          gain.gain.setValueAtTime(0, at);
+          gain.gain.linearRampToValueAtTime(.22, at + .014);
+          gain.gain.exponentialRampToValueAtTime(.001, at + .17);
+          oscillator.connect(gain);
+          gain.connect(audio.destination);
+          const tone = {
+            oscillator, gain
+          };
+          app.audioNodes.add(tone);
+          oscillator.onended = () => {
+            app.audioNodes.delete(tone);
+            oscillator.disconnect();
+            gain.disconnect();
+          };
+          oscillator.start(at);
+          oscillator.stop(at + .2);
+        });
+      }
+      if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+        const timer = setTimeout(() => {
+          app.soundTimeouts.delete(timer);
+          if (app.screen !== 'alarm' || !settings.sound || document.hidden) return;
+          speechSynthesis.cancel();
+          const phrase = new SpeechSynthesisUtterance(app.alarmReason === 'eyes_closed' ? '일어나!' : '모습을 확인해 주세요!');
+          phrase.lang = 'ko-KR';
+          phrase.rate = 1.03;
+          phrase.volume = .85;
+          const korean = speechSynthesis.getVoices().find(voice => /^ko[-_]/i.test(voice.lang));
+          if (korean) phrase.voice = korean;
+          speechSynthesis.speak(phrase);
+        }, 800);
+        app.soundTimeouts.add(timer);
+      }
+    } catch (_) {
+      /* Visual alert remains available if audio is blocked. */
+    }
+  }
+  function suspendAudio() {
+    if (app.audio?.state === 'running') app.audio.suspend().catch(() => {
+    });
+  }
+
+  // ── 세션 전환 · 이벤트 ────────────────────────────────────────
+  function beginAlarm(test, reason = 'eyes_closed') {
+    if (app.screen !== 'monitor' || app.paused || document.hidden) return;
+    haltLoop();
+    stopAudio();
+    app.alarmTest = test;
+    app.alarmReason = test ? 'eyes_closed' : reason;
+    if (dialog.open) {
+      app.panelOpen = false;
+      dialog.close();
+    }
+    const isSleep = test || reason === 'eyes_closed';
+    const reasons = { covered: '눈 가림', lying: '누운 자세', head_down: '고개 숙임', face_hidden: '얼굴 확인 어려움', angle: '얼굴 각도 확인 어려움' };
+    setText('alarmTitle', isSleep ? '일어나!' : '괜찮아요?');
+    $('alarmScreen').classList.toggle('check-alarm', !isSleep);
+    setText('awakeButtonLabel', isSleep ? '깼어요' : '확인했어요');
+    setText('alarmSubtitle', test ? '이렇게 알려드릴게요.' :
+      (isSleep ? '눈 감김이 ' : (reasons[reason] || '확인이 어려운 모습') + ' 상태가 ') + settings.seconds + '초 동안 이어졌어요.');
+    show('alarmTag', test);
+    setScreen('alarm');
+    alarmSound();
+    app.alarmInterval = setInterval(alarmSound, 4000);
+  }
+  function dismissAlarm() {
+    if (app.screen !== 'alarm' || document.hidden) return;
+    stopAudio();
+    gate.reset();
+    app.cooldownUntil = app.alarmTest ? 0 : performance.now() + JOLJIMA_LIMITS.cooldownMs;
+    app.alarmTest = false;
+    setScreen('monitor');
+    renderState(app.live ? 'unknown' : 'preview');
+    if (app.live) {
+      const session = app.session;
+      withTimeout(video.play(), JOLJIMA_LIMITS.playbackTimeoutMs, '카메라 재생을 다시 확인해 주세요.')
+      .then(() => {
+        if (session === app.session && app.screen === 'monitor') startLoop();
+      })
+      .catch(() => {
+        if (session === app.session) pauseSession();
+      });
+    } else startLoop();
+  }
+  function stopSession() {
+    app.session++;
+    app.paused = false;
+    app.panelOpen = false;
+    haltLoop();
+    stopAudio();
+    suspendAudio();
+    stopCamera();
+    releaseWakeLock();
+    if (dialog.open) dialog.close();
+    show('pauseActions', false);
+    show('toolbar');
+    show('toast', false);
+    clearTimeout(app.toastId);
+    show('settingsButton', false);
+    app.alarmTest = false;
+    app.cooldownUntil = 0;
+    releaseModel();
+    setScreen('intro');
+    syncSettings();
+  }
+  async function startSession() {
+    if (document.hidden || (!['intro', 'error'].includes(app.screen) && !app.paused)) return;
+    stopCamera();
+    primeAudio();
+    stopAudio();
+    haltLoop();
+    const session = ++app.session;
+    app.paused = false;
+    app.panelOpen = false;
+    app.cooldownUntil = 0;
+    show('pauseActions', false);
+    show('toolbar');
+    cameraUI(false);
+    show('toast', false);
+    if (!app.live) {
+      setScreen('monitor');
+      renderState('preview');
+      return;
+    }
+    setScreen('loading');
+    setText('loadingSubtitle', app.model ? '카메라를 준비하고 있어요.' : 'AI를 불러오고 있어요.');
+    try {
+      await loadModel();
+      if (session !== app.session || document.hidden) return;
+      setText('loadingSubtitle', '카메라 권한을 허용해 주세요.');
+      await ensureCamera(session);
+      if (session !== app.session || document.hidden || !app.stream) return;
+      app.model.resetSession();
+      setScreen('monitor');
+      renderState('unknown', 0, 'calibrating');
+      requestWakeLock();
+      startLoop();
+    } catch (error) {
+      if (session !== app.session) return;
+      haltLoop();
+      stopCamera();
+      releaseWakeLock();
+      setText('errorMessage', cameraError(error));
+      setScreen('error');
+    }
+  }
+  function pauseSession() {
+    if (!['monitor', 'loading', 'alarm'].includes(app.screen)) return;
+    if (app.screen === 'loading') releaseModel();
+    app.session++;
+    app.paused = true;
+    app.panelOpen = false;
+    haltLoop();
+    stopAudio();
+    suspendAudio();
+    stopCamera();
+    releaseWakeLock();
+    if (dialog.open) dialog.close();
+    show('toolbar', false);
+    show('pauseActions');
+    setScreen('monitor', !document.hidden);
+    renderState('paused');
+  }
+  function openSettings() {
+    if (app.screen !== 'monitor' || app.paused || dialog.open) return;
+    app.panelOpen = true;
+    haltLoop();
+    syncSettings();
+    renderState(app.live ? 'unknown' : 'preview');
+    dialog.showModal();
+  }
+  function closeSettings() {
+    if (dialog.open) dialog.close();
+  }
+  dialog.addEventListener('close', () => {
+    app.panelOpen = false;
+    saveSettings();
+    if (app.screen === 'monitor' && !app.paused && !document.hidden) {
+      gate.reset();
+      renderState(app.live ? 'unknown' : 'preview');
+      startLoop();
+    }
+  });
+  $('settingsButton').addEventListener('click', openSettings);
+  $('settingsDone').addEventListener('click', closeSettings);
+  $('delayInput').addEventListener('input', event => {
+    const value = Number(event.target.value);
+    if (!Number.isInteger(value) || value < 2 || value > 30) return;
+    settings.seconds = value;
+    gate.reset();
+    syncSettings();
+  });
+  $('delayInput').addEventListener('change', saveSettings);
+  $('soundInput').addEventListener('change', event => {
+    settings.sound = event.target.checked;
+    syncSettings();
+    saveSettings();
+  });
+  $('testAlarmButton').addEventListener('click', () => {
+    primeAudio();
+    beginAlarm(true);
+  });
+  $('startButton').addEventListener('click', () => startSession());
+  $('retryButton').addEventListener('click', () => startSession());
+  $('resumeButton').addEventListener('click', () => startSession());
+  $('cameraButton').addEventListener('click', toggleCamera);
+  $('awakeButton').addEventListener('click', dismissAlarm);
+  ['endButton', 'alarmEndButton', 'pausedEndButton', 'cancelButton', 'errorHomeButton'].forEach(id => $(id).addEventListener('click',
+  stopSession));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseSession();
+      stopAudio();
+    }
+  });
+  window.addEventListener('pagehide', () => {
+    app.session++;
+    haltLoop();
+    stopAudio();
+    stopCamera();
+    releaseWakeLock();
+    releaseModel();
+    clearTimeout(app.toastId);
+    cancelAnimationFrame(app.focusId);
+    if (app.audio && app.audio.state !== 'closed') app.audio.close().catch(() => {
+    });
+    app.audio = null;
+  });
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) stopSession();
+  });
+  // Mirror only the preview. Analysis receives the full, unmirrored frame.
+  video.style.transform = MIRROR_INPUT ? 'scaleX(-1)' : 'none';
+  syncSettings();
+  setScreen('intro', false);
+  cameraUI(false);
+})();
+
+</script>
+</body>
+</html>
