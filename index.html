@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ko">
+<html lang="ko" data-build="2026.09.14-r4">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
@@ -1232,6 +1232,26 @@ dialog::backdrop {
 }
 @media(prefers-reduced-motion:reduce) {.scan-progress span,.scan-guide{transition:none!important;}}
 
+
+/* r4: diagnostics are deliberately separate from the uncluttered monitor. */
+.diagnostic-screen{width:min(560px,100%);margin:auto;text-align:center;padding:18px 0 28px}
+.diagnostic-screen h2{font-size:clamp(27px,4vw,38px);letter-spacing:-1.4px;margin-bottom:9px}
+.diagnostic-screen .subtitle{font-size:13px;min-height:20px}
+.diagnostic-camera{position:relative;width:min(100%,410px);aspect-ratio:4/3;margin:20px auto 15px;border-radius:20px;background:#253029;overflow:hidden}
+.diagnostic-camera .camera-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:1;pointer-events:none}
+.diag-case select{width:min(100%,410px);font:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--ink)}
+.diag-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;text-align:left;margin:15px auto;max-width:410px;border:1px solid var(--line);border-radius:14px;padding:3px 14px}
+.diag-grid>div{padding:10px 0;min-width:0}.diag-grid>div:nth-child(2n){padding-left:12px}
+.diag-grid span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}
+.diag-grid strong{font-size:13px;font-weight:650;display:block;overflow-wrap:anywhere;line-height:1.5;font-variant-numeric:tabular-nums}
+.diag-outcome{font-size:12px;line-height:1.7;max-width:410px;margin:12px auto;min-height:22px;color:var(--muted)}
+.diag-outcome[data-result=fail]{color:#88422b}.diag-outcome[data-result=pass]{color:#42643b}
+.diag-details{max-width:410px;margin:22px auto 0;font-size:11px;color:var(--muted);line-height:1.7;text-align:left;border-top:1px solid var(--line);padding-top:14px}
+.diag-details summary{cursor:pointer;font-weight:650}.diag-details p{margin:10px 0}.diag-details .text-button{margin:0;font-size:12px}
+.build-label{font-size:10px;color:var(--muted);margin-top:18px;letter-spacing:.7px}
+.settings-tools{flex-wrap:wrap;gap:10px}
+@media(max-width:480px){.diagnostic-camera{margin-top:16px;max-height:230px;aspect-ratio:4/3}.diag-grid{margin:12px 0}.diagnostic-screen{padding-top:5px}.diag-grid strong{font-size:12px}.diag-grid span{font-size:9px}.diagnostic-screen .subtitle{font-size:12px}.diag-outcome{font-size:11px}}
+
 </style>
 </head>
 <body data-screen="intro">
@@ -1261,6 +1281,31 @@ dialog::backdrop {
 <div class="scan-progress" id="scanProgress" role="progressbar" aria-label="현재 단계 스캔 진행" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="scanProgressFill"></span></div>
 <div class="scan-actions"><button class="primary" id="scanButton">정면 스캔<svg><use href="#i-arrow"/></svg></button><button class="text-button" id="scanCancelButton">취소</button></div>
 </section>
+<section class="screen diagnostic-screen" id="diagnosticScreen" hidden aria-labelledby="diagnosticTitle">
+  <p class="scan-step">실제 카메라로 확인하기</p>
+  <h2 id="diagnosticTitle" tabindex="-1">인식 점검</h2>
+  <p class="subtitle" id="diagnosticHint">검사할 모습을 고른 뒤 시작해 주세요.</p>
+  <div id="diagnosticCamera" class="diagnostic-camera"></div>
+  <div class="diag-case"><label class="sr-only" for="diagnosticCase">점검할 모습</label><select id="diagnosticCase">
+    <option value="closed">정면에서 눈 감기</option><option value="open">정면에서 눈 뜨기</option>
+    <option value="reading">책 보며 눈 뜨기</option><option value="readingClosed">책 보는 자세로 눈 감기</option>
+    <option value="lyingOpen">누워서 눈 뜨기</option><option value="lyingClosed">누워서 눈 감기</option>
+    <option value="covered">손으로 눈 가리기</option>
+  </select></div>
+  <div class="diag-grid" aria-label="실시간 측정값">
+    <div><span>눈 감김 점수 · 왼쪽 / 오른쪽</span><strong id="diagEyes">— / —</strong></div>
+    <div><span>눈 감김 누적</span><strong id="diagTime">0.0초</strong></div>
+    <div><span>현재 판단</span><strong id="diagState">새 화면을 기다려요</strong></div>
+    <div><span>몸 자세</span><strong id="diagPosture">확인 중</strong></div>
+  </div>
+  <p id="diagOutcome" class="diag-outcome" role="status">점수는 수면 확률이나 정확도가 아니에요.</p>
+  <div class="scan-actions"><button class="primary" id="diagnosticStart">점검 시작<svg><use href="#i-arrow"/></svg></button><button class="text-button" id="diagnosticDone">감지 화면으로</button></div>
+  <details class="diag-details"><summary>자세한 진단</summary><p id="diagTechnical">r4 · 새 화면을 기다려요</p>
+    <p>눈 감김은 양쪽 점수와 누적 시간으로 확인해요. 누움·가림은 수면과 별도로 표시해요.</p>
+    <button class="text-button" id="exportDiagnostic">숫자 진단 기록 저장</button><p>사진·영상·얼굴 좌표는 저장하지 않아요.</p>
+  </details>
+</section>
+
 <section aria-labelledby="monitorTitle" class="screen monitor" hidden="" id="monitorScreen">
 <div class="visual" data-kind="preview" data-preview="false" id="visual">
 <svg aria-hidden="true" class="progress-ring" viewBox="0 0 282 282"><circle class="ring-track" cx="141" cy="141" r="134"></circle><circle class="ring-fill" cx="141" cy="141" id="ringFill" r="134"></circle></svg>
@@ -1291,9 +1336,9 @@ dialog::backdrop {
 <h2 class="settings-title" id="settingsTitle">알림 설정</h2>
 <div class="setting-row"><div class="setting-label"><label for="delayInput">몇 초 뒤 깨울까요?</label><output class="setting-value" for="delayInput" id="delayValue">5초</output></div><input aria-describedby="delayHelp" class="range" id="delayInput" max="30" min="2" step="1" type="range" value="5"/><div class="range-ends" id="delayHelp"><span>2초</span><span>30초</span></div></div>
 <div class="setting-row sound-setting"><div class="setting-label"><label for="soundInput">소리로 깨우기</label><span class="switch"><input checked="" id="soundInput" type="checkbox"/><span aria-hidden="true" class="switch-track"></span></span></div></div>
-<div class="setting-row"><div class="setting-label"><label for="checkInput">가림·엎드림 확인 알림</label><span class="switch"><input id="checkInput" type="checkbox" aria-describedby="checkHelp"/><span aria-hidden="true" class="switch-track"></span></span></div><p class="setting-caption" id="checkHelp">켜면 20초 이상 눈이 안 보일 때 확인해요.</p></div>
-<div class="settings-tools"><button class="test-button" id="rescanButton"><svg><use href="#i-camera"/></svg>다시 스캔</button><button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button></div>
-<p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
+<div class="setting-row"><div class="setting-label"><label for="checkInput">누움·가림 확인 알림</label><span class="switch"><input id="checkInput" type="checkbox" aria-describedby="checkHelp"/><span aria-hidden="true" class="switch-track"></span></span></div><p class="setting-caption" id="checkHelp">몸·손으로 누움이나 가림이 확인되면 10초 뒤 알려요. 수면 알림과는 별개예요.</p></div>
+<div class="settings-tools"><button class="test-button" id="diagnosticButton">인식 점검</button><button class="test-button" id="rescanButton"><svg><use href="#i-camera"/></svg>다시 스캔</button><button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button></div>
+<p class="build-label">2026.09.14 · r4</p><p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
 <button class="primary done-button" id="settingsDone">완료</button>
 </dialog>
 <div class="toast" hidden="" id="toast" role="status"></div>
@@ -1322,13 +1367,13 @@ const JOLJIMA_VISION = Object.freeze({
   }),
   delegate: 'CPU', // Worker CPU: does not require a discrete GPU.
   preferWorker: true,
-  bodyIntervalMs: 250,
-  handIntervalMs: 250,
+  bodyIntervalMs: 450,
+  handIntervalMs: 650,
   assetTimeoutMs: 45000,
 });
 const MIRROR_INPUT = true; // Preview only; analysis uses the entire, unmirrored frame.
 const JOLJIMA_LIMITS = Object.freeze({
-  sampleIntervalMs: 150,
+  sampleIntervalMs: 120,
   maxFrameGapMs: 1500,
   predictionTimeoutMs: 8000,
   cameraTimeoutMs: 20000,
@@ -1345,42 +1390,66 @@ const JOLJIMA_LIMITS = Object.freeze({
 const JoljimaCore = (() => {
   const KINDS = new Set(['awake', 'sleep', 'check', 'away', 'unknown']);
 
+  /**
+   * Accumulate OBSERVED closed-eye time, not elapsed time while tracking is lost.
+   * A noisy frame pauses evidence; real waking, long gaps and occlusion clear it.
+   * Reasons may change without erasing evidence for the same event.
+   */
   class DrowsinessGate {
-    constructor(seconds = 5, maxGapMs = 1000) {
-      this.seconds = seconds; this.maxGapMs = maxGapMs; this.checkSeconds = 20; this.reset();
+    constructor(seconds = 5, maxGapMs = 1500) {
+      this.seconds = seconds; this.maxGapMs = maxGapMs; this.checkSeconds = 10; this.reset();
     }
     reset() {
       this.lastAt = null; this.lastKind = 'unknown'; this.lastReason = '';
-      this.sleepMs = 0; this.fired = false; this.uncertainAt = null;
+      this.sleepMs = 0; this.checkMs = 0; this.episodeAt = null;
+      this.breakAt = null; this.awakeAt = null; this.checkBreakAt = null;
+      this.checkGroup = ''; this.fired = false; this.checkFired = false;
     }
+    clearSleep() { this.sleepMs = 0; this.episodeAt = null; this.breakAt = null; this.awakeAt = null; this.fired = false; }
     observe(kind, now, reason = '') {
-      if (!Number.isFinite(now) || now < 0 || (this.lastAt !== null && now <= this.lastAt)) {
-        this.reset(); return { kind: 'unknown', sleepMs: 0, trigger: false };
-      }
+      if (!Number.isFinite(now) || now < 0 || (this.lastAt !== null && now <= this.lastAt))
+        return { kind: 'unknown', sleepMs: 0, trigger: false, stale: true };
       if (!KINDS.has(kind)) kind = 'unknown';
-      const gap = this.lastAt === null ? 0 : now - this.lastAt;
-      const continuous = this.lastAt !== null && gap <= this.maxGapMs;
-      const previousSleep = this.lastKind === 'sleep' || this.uncertainAt !== null;
-      // At most 300 ms of uncertain eye scores can pause a sleepy interval.
-      // That time is never added. Missing faces, occlusion and clear waking
-      // observations always reset the interval immediately.
-      const uncertain = kind === 'unknown' && reason === 'uncertain' && previousSleep && continuous;
-      if (uncertain) {
-        if (this.uncertainAt === null) this.uncertainAt = now;
-        if (now - this.uncertainAt > 300) { this.sleepMs = 0; this.fired = false; this.uncertainAt = null; }
-      } else {
-        const resume = kind === 'sleep' && this.uncertainAt !== null && now - this.uncertainAt <= 300 && continuous;
-        const active = kind === 'sleep' || kind === 'check';
-        const same = active && this.lastKind === kind && this.lastReason === reason && continuous;
-        this.sleepMs = same ? this.sleepMs + gap : resume ? this.sleepMs : 0;
-        if (!same && !resume) this.fired = false;
-        this.uncertainAt = null;
+      let gap = this.lastAt === null ? 0 : now - this.lastAt;
+      if (gap > this.maxGapMs) { this.reset(); gap = 0; }
+      const hardStop = kind === 'away' || kind === 'check' ||
+        ['multiple', 'dark', 'glare', 'covered', 'unavailable', 'needs_scan'].includes(reason);
+      if (hardStop) this.clearSleep();
+      else if (kind === 'sleep') {
+        if (this.breakAt !== null && now - this.breakAt > 1000) this.clearSleep();
+        if (this.episodeAt === null) this.episodeAt = now;
+        if (this.lastKind === 'sleep') this.sleepMs += gap;
+        this.breakAt = this.awakeAt = null;
+      } else if (this.episodeAt !== null) {
+        if (this.breakAt === null) this.breakAt = now;
+        if (kind === 'awake') {
+          if (this.awakeAt === null) this.awakeAt = now;
+          if (now - this.awakeAt >= 400) this.clearSleep();
+        } else this.awakeAt = null;
+        if (this.breakAt !== null && now - this.breakAt >= 1000) this.clearSleep();
       }
-      const threshold = (kind === 'check' ? this.checkSeconds : this.seconds) * 1000;
-      const trigger = (kind === 'sleep' || kind === 'check') && !this.fired && this.sleepMs >= threshold;
-      if (trigger) this.fired = true;
+      // Do not join many sparse closures into one supposed long closure.
+      if (this.episodeAt !== null && now - this.episodeAt > 2500 &&
+          this.sleepMs / Math.max(1, now - this.episodeAt) < .60) this.clearSleep();
+      const group = ['lying', 'lying_hidden', 'head_down'].includes(reason) ? 'posture' : reason;
+      if (kind === 'check') {
+        if (group !== this.checkGroup || (this.checkBreakAt !== null && now - this.checkBreakAt > 850)) {
+          this.checkMs = 0; this.checkFired = false;
+        } else if (this.lastKind === 'check') this.checkMs += gap;
+        this.checkGroup = group; this.checkBreakAt = null;
+      } else {
+        if (this.checkBreakAt === null) this.checkBreakAt = now;
+        if (kind === 'awake' || kind === 'sleep' || kind === 'away' || hardStop || now - this.checkBreakAt > 850) {
+          this.checkMs = 0; this.checkGroup = ''; this.checkFired = false;
+        }
+      }
+      const sleepTrigger = kind === 'sleep' && !this.fired && this.sleepMs >= this.seconds * 1000;
+      const checkTrigger = kind === 'check' && !this.checkFired && this.checkMs >= this.checkSeconds * 1000;
+      if (sleepTrigger) this.fired = true;
+      if (checkTrigger) this.checkFired = true;
       this.lastAt = now; this.lastKind = kind; this.lastReason = reason;
-      return { kind, sleepMs: this.sleepMs, trigger };
+      return { kind, sleepMs: kind === 'check' ? this.checkMs : this.sleepMs,
+        trigger: sleepTrigger || checkTrigger, held: kind === 'unknown' && this.sleepMs > 0 };
     }
   }
 
@@ -1406,7 +1475,8 @@ const JoljimaCore = (() => {
       seconds: Number.isInteger(saved?.seconds) && saved.seconds >= 2 && saved.seconds <= 30
       ? saved.seconds : 5,
       sound: typeof saved?.sound === 'boolean' ? saved.sound : true,
-      checkAlerts: typeof saved?.checkAlerts === 'boolean' ? saved.checkAlerts : false,
+      checkAlerts: saved?.schema === 4 && typeof saved.checkAlerts === 'boolean' ? saved.checkAlerts : true,
+      schema: 4,
     };
   }
 
@@ -1530,10 +1600,11 @@ const JoljimaSignals = (() => {
     if (indexes.some(i => !inFrame(points[i]))) return null;
     const p = indexes.map(i => point(points[i], w, h));
     const width = distance(p[0], p[3]);
-    if (width < 7) return null;
-    return { width, ear: (distance(p[1], p[5]) + distance(p[2], p[4])) / (2 * width), center: mid(p[0], p[3]) };
+    if (width < 6) return null;
+    const nx = -(p[3].y - p[0].y) / width, ny = (p[3].x - p[0].x) / width;
+    const aperture = (a, b) => Math.abs((a.x - b.x) * nx + (a.y - b.y) * ny);
+    return { width, ear: (aperture(p[1], p[5]) + aperture(p[2], p[4])) / (2 * width), center: mid(p[0], p[3]) };
   }
-
   function faceFeatures(raw, w, h) {
     const p = raw.faceLandmarks?.[0];
     if (!p || p.length < 468) return null;
@@ -1541,50 +1612,48 @@ const JoljimaSignals = (() => {
     const right = eyeAspect(p, [33, 160, 158, 133, 153, 144], w, h);
     if (!left || !right || !inFrame(p[1])) return null;
     const span = distance(left.center, right.center);
-    if (span < 22) return null;
+    if (span < 20) return null;
     const shapes = Object.fromEntries((raw.faceBlendshapes?.[0]?.categories ?? []).map(v => [v.categoryName, v.score]));
-    const shapeL = shapes.eyeBlinkLeft;
-    const shapeR = shapes.eyeBlinkRight;
-    const roll = Math.abs(Math.atan2(Math.abs(right.center.y - left.center.y), Math.abs(right.center.x - left.center.x)) * 180 / Math.PI);
+    const ux = (left.center.x - right.center.x) / span, uy = (left.center.y - right.center.y) / span;
+    let dx = -uy, dy = ux;
+    if (valid(p[10]) && valid(p[152]) && (p[152].x - p[10].x) * w * dx + (p[152].y - p[10].y) * h * dy < 0) { dx *= -1; dy *= -1; }
+    const center = mid(left.center, right.center), nose = point(p[1], w, h);
+    const roll = Math.abs(Math.atan2(uy, ux) * 180 / Math.PI);
     const zSkew = Math.abs((p[33].z ?? 0) - (p[263].z ?? 0)) * w / span;
     const balance = Math.min(left.width, right.width) / Math.max(left.width, right.width);
-    // Oblique/near-profile eyes are explicitly not used for a sleep conclusion.
-    const reliable = roll < 60 && zSkew < 1.05 && balance > .42 &&
-      Number.isFinite(shapeL) && Number.isFinite(shapeR);
-    return {
-      left, right, span, roll, zSkew, balance, reliable,
-      // Pose descriptors depend on the forehead/chin/nose, not eyelid aperture.
-      // They are relative features, NOT medically meaningful angles.
-      pose: {
-        pitch: valid(p[10]) && valid(p[152]) ? ((p[152].z ?? 0) - (p[10].z ?? 0)) * w / span : 0,
-        noseDrop: (p[1].y * h - mid(left.center, right.center).y) / span,
-        yaw: ((p[33].z ?? 0) - (p[263].z ?? 0)) * w / span,
-      },
-      nose: point(p[1], w, h), center: mid(left.center, right.center),
-      blinkL: shapeL ?? 0, blinkR: shapeR ?? 0,
-      ear: (left.ear + right.ear) / 2,
-    };
+    // In-plane head roll is harmless to the rotation-invariant eye measurement.
+    // Reject true near-profile geometry, NOT a face turned sideways in the image.
+    const reliable = zSkew < 1.4 && balance > .32 && left.ear >= 0 && right.ear >= 0 && left.ear < .75 && right.ear < .75;
+    return { left, right, span, roll, zSkew, balance, reliable,
+      pose: { pitch: valid(p[10]) && valid(p[152]) ? ((p[152].z ?? 0) - (p[10].z ?? 0)) * w / span : 0,
+        noseDrop: ((nose.x - center.x) * dx + (nose.y - center.y) * dy) / span,
+        yaw: ((p[33].z ?? 0) - (p[263].z ?? 0)) * w / span },
+      nose, center, blinkL: Number.isFinite(shapes.eyeBlinkLeft) ? shapes.eyeBlinkLeft : null,
+      blinkR: Number.isFinite(shapes.eyeBlinkRight) ? shapes.eyeBlinkRight : null,
+      ear: (left.ear + right.ear) / 2 };
   }
-
   function bodyFeatures(raw, w, h) {
-    if ((raw.poseAgeMs ?? 0) > 450) return null;
+    if ((raw.poseAgeMs ?? 0) > 900) return null;
     const p = raw.poseLandmarks?.[0];
     if (!p || p.length < 25) return null;
-    const shouldersGood = visible(p[11]) && visible(p[12]);
-    const anchors = [0, 11, 12, 23, 24].filter(i => visible(p[i]));
+    const sg = visible(p[11], .45) && visible(p[12], .45);
+    const anchors = [0, 11, 12, 23, 24].filter(i => visible(p[i], .45));
     if (anchors.length < 2) return null;
-    const shoulders = shouldersGood ? mid(point(p[11], w, h), point(p[12], w, h)) : null;
-    const span = shouldersGood ? distance(point(p[11], w, h), point(p[12], w, h)) : 0;
-    const nose = visible(p[0], .45) ? point(p[0], w, h) : null;
-    const hipsGood = visible(p[23], .65) && visible(p[24], .65);
-    const hips = hipsGood ? mid(point(p[23], w, h), point(p[24], w, h)) : null;
+    const shoulderL = sg ? point(p[11], w, h) : null, shoulderR = sg ? point(p[12], w, h) : null;
+    const shoulders = sg ? mid(shoulderL, shoulderR) : null, span = sg ? distance(shoulderL, shoulderR) : 0;
+    const nose = visible(p[0], .4) ? point(p[0], w, h) : null;
+    const hg = visible(p[23], .5) && visible(p[24], .5);
+    const hips = hg ? mid(point(p[23], w, h), point(p[24], w, h)) : null;
     const torso = shoulders && hips ? distance(shoulders, hips) : 0;
-    const lying = torso > 55 && shoulders && hips &&
-      Math.abs(hips.x - shoulders.x) > Math.abs(hips.y - shoulders.y) * 1.7;
-    const headRise = shoulders && nose && span > 45 ? (shoulders.y - nose.y) / span : null;
-    const eyeAnchors = visible(p[2], .35) && visible(p[5], .35)
-      ? [point(p[2], w, h), point(p[5], w, h)] : null;
-    return { p, shoulders, span, nose, hips, lying: !!lying, headRise, eyeAnchors, solid: shouldersGood && span > 45 };
+    const fullLying = torso > 40 && Math.abs(hips.x - shoulders.x) > Math.abs(hips.y - shoulders.y) * 1.5;
+    const headVector = shoulders && nose ? { x: nose.x - shoulders.x, y: nose.y - shoulders.y } : null;
+    const upperLying = span > 32 && headVector && Math.hypot(headVector.x, headVector.y) > 24 &&
+      Math.abs(headVector.x) > Math.abs(headVector.y) * 1.45 &&
+      Math.abs(shoulderL.y - shoulderR.y) > Math.abs(shoulderL.x - shoulderR.x) * .9;
+    const headRise = shoulders && nose && span > 32 ? (shoulders.y - nose.y) / span : null;
+    const eyeAnchors = visible(p[2], .35) && visible(p[5], .35) ? [point(p[2], w, h), point(p[5], w, h)] : null;
+    return { p, shoulders, span, nose, hips, lying: !!(fullLying || upperLying), headRise, eyeAnchors,
+      solid: sg && span > 32, present: anchors.length >= 3 || sg && span > 32 };
   }
 
   function pointSegmentDistance(p, a, b) {
@@ -1615,7 +1684,7 @@ const JoljimaSignals = (() => {
 
   /** A hand projected over an eye is a visibility check, NEVER proof of sleeping. */
   function eyeOcclusion(raw, face, body, w, h) {
-    if ((raw.handAgeMs ?? 0) > 450) return false;
+    if ((raw.handAgeMs ?? 0) > 850) return false;
     let eyes = face ? [face.left.center, face.right.center] : body?.eyeAnchors;
     if (!eyes || distance(eyes[0], eyes[1]) < 12) return false;
     const span = distance(eyes[0], eyes[1]);
@@ -1624,13 +1693,13 @@ const JoljimaSignals = (() => {
       const polygon = hull(hand.filter(inFrame).map(p => point(p, w, h)));
       const bounds = polygon.reduce((r, p) => ({ minX: Math.min(r.minX, p.x), maxX: Math.max(r.maxX, p.x), minY: Math.min(r.minY, p.y), maxY: Math.max(r.maxY, p.y) }), { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
       if (Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY) < span * .35) continue;
-      if (eyes.some(p => insideOrNear(p, polygon, span * .12))) return true;
+      if (eyes.some(p => insideOrNear(p, polygon, span * .055))) return true;
     }
     return false;
   }
 
-  // Calibration and classification below use relative, per-eye values. There is
-  // deliberately no population-average EAR threshold or silent fallback profile.
+  // Robust labelled calibration. Front and reading have their OWN open/closed
+  // pairs: a reading-open reference can no longer veto a front-closed observation.
   const quantile = (values, q) => {
     const a = values.filter(Number.isFinite).sort((x, y) => x - y);
     if (!a.length) return null;
@@ -1638,35 +1707,33 @@ const JoljimaSignals = (() => {
     return a[lo] + (a[hi] - a[lo]) * (at - lo);
   };
   function summary(values) {
-    const mid = quantile(values, .5);
-    return { lo: quantile(values, .2), mid, hi: quantile(values, .8),
-      mad: quantile(values.map(v => Math.abs(v - mid)), .5) };
+    const m = quantile(values, .5);
+    return { lo: quantile(values, .2), mid: m, hi: quantile(values, .8),
+      mad: quantile(values.filter(Number.isFinite).map(v => Math.abs(v - m)), .5) ?? 0 };
   }
-  const poseDistance = (a, b) => Math.hypot((a.pitch - b.pitch) / .6, (a.noseDrop - b.noseDrop) / .3);
+  const poseDistance = (a, b) => Math.hypot((a.pitch - b.pitch) / .8, (a.noseDrop - b.noseDrop) / .38,
+    (a.yaw - b.yaw) / 1.2);
   function inspect(raw) {
     if (!raw) return { ok: false, reason: 'unavailable' };
-    if ((raw.faceLandmarks?.length ?? 0) > 1 || (raw.poseLandmarks?.length ?? 0) > 1)
+    if ((raw.faceLandmarks?.length ?? 0) > 1 || ((raw.poseAgeMs ?? 0) <= 650 && (raw.poseLandmarks?.length ?? 0) > 1))
       return { ok: false, reason: 'multiple' };
-    const q = raw.quality ?? {};
-    // Face-local brightness avoids rejecting a well-lit face against a dark room.
-    const brightness = q.faceMean ?? q.mean;
-    if (Number.isFinite(brightness) && brightness < 12 && (q.faceContrast ?? 0) < 12)
+    const q = raw.quality ?? {}, brightness = q.faceMean ?? q.mean;
+    if (Number.isFinite(brightness) && brightness < 10 && (q.faceContrast ?? 0) < 10)
       return { ok: false, reason: 'dark' };
-    if (brightness > 251 && (q.faceContrast ?? 20) < 4)
+    if (brightness > 253 && (q.faceContrast ?? 20) < 3)
       return { ok: false, reason: 'glare' };
     const w = raw.width || 640, h = raw.height || 480;
     const face = faceFeatures(raw, w, h), body = bodyFeatures(raw, w, h);
     const covered = eyeOcclusion(raw, face, body, w, h);
     if (covered) return { ok: false, reason: 'covered', face, body };
-    if (!face) return { ok: false, reason: body?.solid ? (body.lying ? 'lying_hidden' : 'face_hidden') : 'not_found', face, body };
+    if (!face) return { ok: false, reason: body?.present ? (body.lying ? 'lying_hidden' : 'face_hidden') : 'not_found', face, body };
     if (!face.reliable) return { ok: false, reason: 'angle', face, body };
-    if (Math.min(face.left.width, face.right.width) < 8 || face.span < 28)
+    if (Math.min(face.left.width, face.right.width) < 8 || face.span < 26)
       return { ok: false, reason: 'too_far', face, body };
     return { ok: true, face, body };
   }
   function snapshot(face) {
-    return { left: { ear: face.left.ear, blink: face.blinkL },
-      right: { ear: face.right.ear, blink: face.blinkR }, pose: { ...face.pose } };
+    return { left: { ear: face.left.ear, blink: face.blinkL }, right: { ear: face.right.ear, blink: face.blinkR }, pose: { ...face.pose } };
   }
   function summarizeFrames(frames) {
     const out = { count: frames.length, pose: {} };
@@ -1678,191 +1745,195 @@ const JoljimaSignals = (() => {
     return out;
   }
   function channels(open, shut) {
-    const earGap = open.ear.lo - shut.ear.hi;
-    const blinkGap = shut.blink.lo - open.blink.hi;
+    const gap = open.ear.mid - shut.ear.mid;
+    const shapeGap = (shut.blink.mid ?? 0) - (open.blink.mid ?? 0);
+    const noise = open.ear.mad + shut.ear.mad;
     return {
-      // The numerical floors below reject unresolved measurements; they are not
-      // thresholds for the physical size of a person's eyes.
-      ear: earGap > Math.max(.007, open.ear.mid * .045, 2.5 * (open.ear.mad + shut.ear.mad)),
-      blink: blinkGap > Math.max(.08, 2.5 * (open.blink.mad + shut.blink.mad)),
-      openEar: open.ear.lo, shutEar: shut.ear.hi,
-      openBlink: open.blink.hi, shutBlink: shut.blink.lo,
+      ear: gap > Math.max(.004, open.ear.mid * .035, noise * 1.6),
+      blink: open.blink.mid !== null && shut.blink.mid !== null && shapeGap > Math.max(.07, (open.blink.mad + shut.blink.mad) * 1.6),
+      openEar: open.ear.mid, shutEar: shut.ear.mid, openBlink: open.blink.mid, shutBlink: shut.blink.mid,
+      earWeight: clamp(.65 + .10 * (1 - noise / Math.max(.001, gap)), .6, .75),
     };
   }
-  function combinedOpen(front, reading) {
-    return {
-      ear: { lo: Math.min(front.ear.lo, reading.ear.lo), mid: Math.min(front.ear.mid, reading.ear.mid), mad: Math.max(front.ear.mad, reading.ear.mad) },
-      blink: { hi: Math.max(front.blink.hi, reading.blink.hi), mad: Math.max(front.blink.mad, reading.blink.mad) },
-    };
+  function makePair(open, closed) {
+    const pair = { left: channels(open.left, closed.left), right: channels(open.right, closed.right), pose: open.pose };
+    pair.supported = ['left', 'right'].every(k => pair[k].ear || pair[k].blink);
+    return pair;
   }
   function buildProfile(samples) {
-    if (samples.length !== 3 || samples.some(s => s.length < 10))
-      return { ok: false, reason: 'not_enough' };
+    if (samples.length < 3 || samples.slice(0, 3).some(s => s.length < 8)) return { ok: false, reason: 'not_enough' };
     const front = summarizeFrames(samples[0]), closed = summarizeFrames(samples[2]);
-    const hiddenReading = samples[1].filter(f => f.unobservable);
-    const visibleReading = samples[1].filter(f => !f.unobservable);
-    const readingHidden = hiddenReading.length > samples[1].length * .2 || visibleReading.length < 10;
-    const reading = readingHidden ? null : summarizeFrames(visibleReading);
-    if (poseDistance(front.pose, closed.pose) > .85 || Math.abs(front.pose.yaw - closed.pose.yaw) > .4)
-      return { ok: false, reason: 'closed_pose' };
-    const profiles = { front: {}, reading: {}, safe: {} };
-    if (readingHidden) {
-      // Do not discard the eye samples collected before a reading face became
-      // hidden. Even a few valid labelled samples can conservatively veto a
-      // false closure; they must not be promoted to a full reading calibration.
-      const partial = visibleReading.length >= 3 ? summarizeFrames(visibleReading) : null;
-      for (const eye of ['left', 'right']) {
-        profiles.front[eye] = channels(front[eye], closed[eye]);
-        if (partial) profiles.safe[eye] = channels(combinedOpen(front[eye], partial[eye]), closed[eye]);
+    if (poseDistance(front.pose, closed.pose) > 1.1) return { ok: false, reason: 'closed_pose' };
+    const hidden = samples[1].filter(f => f.unobservable), visible = samples[1].filter(f => !f.unobservable);
+    const reading = visible.length >= 8 ? summarizeFrames(visible) : null;
+    const profiles = { front: makePair(front, closed), reading: null, shared: null };
+    if (!profiles.front.supported) return { ok: false, reason: 'inseparable' };
+    let readingClosed = null;
+    if (reading && samples[3]?.length >= 8) {
+      readingClosed = summarizeFrames(samples[3]);
+      if (poseDistance(reading.pose, readingClosed.pose) > 1.3) return { ok: false, reason: 'reading_closed_pose' };
+      const pair = makePair(reading, readingClosed);
+      if (pair.supported) profiles.reading = pair;
+      // When only the gaze changes, pose cannot identify front versus reading.
+      // Use a conservative shared envelope ONLY if both labels remain separable.
+      if (pair.supported && poseDistance(front.pose, reading.pose) < .55) {
+        const openEnvelope = { pose: front.pose }, shutEnvelope = { pose: closed.pose };
+        for (const eye of ['left','right']) {
+          const pick = (a,b,which) => ({...a,mid:which(a.mid,b.mid),mad:Math.max(a.mad,b.mad)});
+          openEnvelope[eye] = { ear:pick(front[eye].ear,reading[eye].ear,Math.min), blink:pick(front[eye].blink,reading[eye].blink,Math.max) };
+          shutEnvelope[eye] = { ear:pick(closed[eye].ear,readingClosed[eye].ear,Math.max), blink:pick(closed[eye].blink,readingClosed[eye].blink,Math.min) };
+        }
+        const shared=makePair(openEnvelope,shutEnvelope);
+        if(shared.supported) profiles.shared=shared;
       }
-      const works = ref => ['left', 'right'].every(k => ref[k]?.ear || ref[k]?.blink);
-      if (!works(profiles.front)) return { ok: false, reason: 'inseparable' };
-      const safe = partial ? works(profiles.safe) : false;
-      if (partial && !safe && poseDistance(front.pose, partial.pose) < .65) return { ok: false, reason: 'reading_overlap' };
-      return { ok: true, profile: { version: 2, front, closed, reading: partial, profiles, safe, readingHidden: true,
-        readingHeadRise: median(hiddenReading.map(f => f.headRise).filter(Number.isFinite)),
-        limited: true, createdAt: Date.now() } };
     }
-    for (const eye of ['left', 'right']) {
-      profiles.front[eye] = channels(front[eye], closed[eye]);
-      profiles.reading[eye] = channels(reading[eye], closed[eye]);
-      profiles.safe[eye] = channels(combinedOpen(front[eye], reading[eye]), closed[eye]);
-    }
-    const supported = ref => ['left', 'right'].every(k => ref[k].ear || ref[k].blink);
-    if (!supported(profiles.front)) return { ok: false, reason: 'inseparable' };
-    const safe = supported(profiles.safe);
-    const poseSeparation = poseDistance(front.pose, reading.pose);
-    // Overlapping reading/closed appearances are not magically separable.
-    // Permit front-only monitoring only when the poses themselves are distinct.
-    if (!safe && poseSeparation < .65) return { ok: false, reason: 'reading_overlap' };
-    return { ok: true, profile: { version: 2, front, reading, closed, profiles,
-      safe, poseSeparation, limited: !safe, createdAt: Date.now() } };
+    // Without a separable reading pair, never pretend that reading detection works.
+    return { ok: true, profile: { version: 3, front, closed, reading, readingClosed, profiles,
+      readingHidden: hidden.length > samples[1].length * .25 || !reading,
+      readingHeadRise: median(hidden.map(f => f.headRise).filter(Number.isFinite)),
+      limited: !profiles.reading, createdAt: Date.now() } };
   }
-
-  /** Three explicitly labelled captures, advanced only by valid observed frames. */
   class Calibration {
     constructor() { this.reset(); }
     reset() {
-      this.step = 0; this.samples = [[], [], []]; this.phase = 'ready';
+      this.step = 0; this.samples = [[], [], [], []]; this.phase = 'ready';
       this.collectedMs = 0; this.lastValidAt = null; this.lastWasValid = false; this.lastAt = null;
-      this.startedAt = null; this.settleUntil = null; this.profile = null; this.error = '';
+      this.startedAt = null; this.settleUntil = null; this.profile = null; this.error = ''; this.total = 4;
     }
     start(now) {
       if (this.phase === 'complete') return;
-      this.samples[this.step] = [];
-      this.phase = 'capture'; this.collectedMs = 0; this.lastValidAt = null; this.lastWasValid = false;
-      this.lastAt = null; this.startedAt = now; this.settleUntil = now + (this.step === 2 ? 1700 : 1100);
-      this.error = '';
+      this.samples[this.step] = []; this.phase = 'capture'; this.collectedMs = 0;
+      this.lastValidAt = this.lastAt = null; this.lastWasValid = false;
+      this.startedAt = now; this.settleUntil = now + (this.step >= 2 ? 1700 : 900); this.error = '';
     }
     status(reason = '') {
-      return { phase: this.phase, step: this.step, progress: clamp(this.collectedMs / this.duration, 0, 1), reason: reason || this.error,
-        profile: this.profile, limited: this.profile?.limited ?? false };
+      return { phase: this.phase, step: this.step, total: this.total, progress: clamp(this.collectedMs / this.duration, 0, 1),
+        reason: reason || this.error, profile: this.profile, limited: this.profile?.limited ?? false };
     }
-    get duration() { return this.step === 2 ? 1800 : 2700; }
+    get duration() { return this.step >= 2 ? 2200 : 2500; }
+    finish() {
+      const result = buildProfile(this.samples);
+      if (result.ok) { this.profile = result.profile; this.phase = 'complete'; }
+      else { this.phase = 'failed'; this.error = result.reason; }
+      this.samples = [[], [], [], []];
+    }
     observe(raw, now) {
-      if (this.phase === 'complete' || this.phase === 'failed') return this.status();
+      if (['complete', 'failed'].includes(this.phase)) return this.status();
       const observation = inspect(raw);
       if (this.phase !== 'capture') return this.status(observation.ok ? 'ready' : observation.reason);
       if (!Number.isFinite(now) || now < 0 || (this.lastAt !== null && now <= this.lastAt)) return this.status('stale');
       this.lastAt = now;
-      if (now - this.startedAt > 25000) { this.phase = 'retry'; this.error = 'timeout'; return this.status(); }
+      if (now - this.startedAt > 26000) { this.phase = 'retry'; this.error = 'timeout'; return this.status(); }
       if (now < this.settleUntil) return this.status('settle');
-      const postureOnly = this.step === 1 && !observation.ok && observation.body?.solid && ['face_hidden', 'angle', 'lying_hidden'].includes(observation.reason);
+      const postureOnly = this.step === 1 && !observation.ok && observation.body?.present &&
+        ['face_hidden', 'angle', 'lying_hidden'].includes(observation.reason);
       let reason = observation.ok || postureOnly ? '' : observation.reason;
       const face = observation.face;
-      if (!reason && this.step === 2) {
-        const open = summarizeFrames(this.samples[0]);
-        if (poseDistance(face.pose, open.pose) > .85) reason = 'closed_pose';
-        else {
-          const changed = ['left', 'right'].every((eye, i) =>
-            face[eye].ear < open[eye].ear.mid * .88 || (i === 0 ? face.blinkL : face.blinkR) > open[eye].blink.hi + .1);
-          if (!changed) reason = 'close_eyes';
-        }
+      if (!reason && this.step >= 2) {
+        const open = summarizeFrames(this.samples[this.step === 2 ? 0 : 1].filter(f => !f.unobservable));
+        if (poseDistance(face.pose, open.pose) > (this.step === 2 ? 1.1 : 1.3))
+          reason = this.step === 2 ? 'closed_pose' : 'reading_closed_pose';
+        else if (!['left', 'right'].every((eye, i) => face[eye].ear < open[eye].ear.mid * .92 ||
+          ((i === 0 ? face.blinkL : face.blinkR) ?? 0) > (open[eye].blink.hi ?? 1) + .07)) reason = 'close_eyes';
       }
       if (reason) {
         this.lastWasValid = false;
-        if (this.lastValidAt !== null && now - this.lastValidAt > 800) {
+        if (this.lastValidAt !== null && now - this.lastValidAt > 1200) {
           this.collectedMs = 0; this.samples[this.step] = []; this.lastValidAt = null;
         }
         return this.status(reason);
       }
       const gap = this.lastValidAt === null ? 0 : now - this.lastValidAt;
-      if (gap > 1000) { this.collectedMs = 0; this.samples[this.step] = []; }
-      if (this.lastWasValid && gap > 0 && gap <= 800) this.collectedMs += gap;
-      this.lastWasValid = true;
-      this.lastValidAt = now;
+      if (gap > 1500) { this.collectedMs = 0; this.samples[this.step] = []; }
+      if (this.lastWasValid && gap > 0 && gap <= 1200) this.collectedMs += gap;
+      this.lastWasValid = true; this.lastValidAt = now;
       this.samples[this.step].push(postureOnly ? { unobservable: true, headRise: observation.body.headRise } : snapshot(face));
-      // Bound memory even on devices producing unusually high frame rates.
-      if (this.samples[this.step].length > 100) this.samples[this.step].splice(0, 1);
-      if (this.collectedMs >= this.duration && this.samples[this.step].length >= 10) {
-        if (this.step < 2) { this.step++; this.phase = 'ready'; this.collectedMs = 0; this.lastValidAt = null; }
-        else {
-          const result = buildProfile(this.samples);
-          if (result.ok) { this.profile = result.profile; this.phase = 'complete'; }
-          else { this.phase = 'failed'; this.error = result.reason; }
-          this.samples = [[], [], []]; // Retain only aggregate numeric references.
-        }
+      if (this.samples[this.step].length > 100) this.samples[this.step].shift();
+      if (this.collectedMs >= this.duration && this.samples[this.step].length >= 8) {
+        if (this.step === 1 && this.samples[1].filter(f => !f.unobservable).length < 8) this.total = 3;
+        if (this.step + 1 < this.total) {
+          this.step++; this.phase = 'ready'; this.collectedMs = 0; this.lastValidAt = null;
+        } else this.finish();
       }
       return this.status(postureOnly && this.phase === 'capture' ? 'reading_hidden' : '');
     }
   }
-
   function closure(eye, blink, ref) {
-    const ear = ref.ear ? (ref.openEar - eye.ear) / (ref.openEar - ref.shutEar) : null;
-    const shape = ref.blink ? (blink - ref.openBlink) / (ref.shutBlink - ref.openBlink) : null;
+    if (!ref) return { usable: false };
+    const ear = ref.ear && Number.isFinite(eye?.ear) ? clamp((ref.openEar - eye.ear) / (ref.openEar - ref.shutEar), -.25, 1.3) : null;
+    const shape = ref.blink && Number.isFinite(blink) ? clamp((blink - ref.openBlink) / (ref.shutBlink - ref.openBlink), -.25, 1.3) : null;
     if (ear === null && shape === null) return { usable: false };
-    // Each eye must cross its own calibrated threshold. An available second
-    // signal can veto uncertain geometry instead of blindly averaging it away.
-    const closed = ear !== null
-      ? (ear >= .70 && (shape === null || shape >= .45)) || (ear >= .50 && shape !== null && shape >= .90)
-      : shape >= .94;
-    const open = ear !== null ? ear <= .23 : shape <= .22;
-    return { usable: true, closed, open, ear, shape };
+    // Calibrated geometry is primary. A noisy expression score cannot veto it.
+    const score = clamp(ear !== null && shape !== null ? ear * ref.earWeight + shape * (1 - ref.earWeight) : ear ?? shape, 0, 1);
+    return { usable: true, closed: score >= .62, open: score <= .30, score, ear, shape };
   }
-
+  function blendRef(a, b, t) {
+    if (!a || !b) return a || b;
+    const r = { ear: a.ear && b.ear, blink: a.blink && b.blink };
+    for (const k of ['openEar', 'shutEar', 'openBlink', 'shutBlink', 'earWeight']) r[k] = a[k] * (1 - t) + b[k] * t;
+    // If only one pose has a usable measurement channel, use the nearer pair.
+    return r.ear || r.blink ? r : t < .5 ? a : b;
+  }
   class Analyzer {
     constructor() { this.profile = null; this.reset(); }
-    reset() { this.lastAt = null; }
-    setProfile(profile) {
-      this.profile = profile?.version === 2 ? profile : null;
-      this.reset();
-    }
+    reset() { this.lastAt = null; this.history = []; }
+    setProfile(profile) { this.profile = profile?.version === 3 ? profile : null; this.reset(); }
     analyze(raw, now) {
       if (!Number.isFinite(now) || now < 0) return signal('unknown', 'unavailable');
       if (this.lastAt !== null && now <= this.lastAt) return signal('unknown', 'stale');
       this.lastAt = now;
       if (!this.profile) return signal('unknown', 'needs_scan');
-      const checked = inspect(raw);
-      if (!checked.ok && this.profile.readingHidden && ['face_hidden', 'angle', 'lying_hidden'].includes(checked.reason) && checked.body?.solid) {
-        const reference = this.profile.readingHeadRise;
-        if (reference !== null && checked.body.headRise !== null && Math.abs(checked.body.headRise - reference) < .25)
-          return signal('unknown', 'reading_limited');
+      const checked = inspect(raw), f = checked.face, body = checked.body, p = this.profile;
+      const debug = { rotation: raw.rotation ?? 0, source: raw.faceSource ?? 'full',
+        faceFound: !!f, bodyFound: !!body?.present, posture: body?.lying ? 'lying' : 'upright_or_unknown',
+        inferenceMs: raw.inferenceMs ?? null, left: null, right: null, profile: null };
+      if (!checked.ok) {
+        this.history = [];
+        if (checked.reason === 'not_found') return signal('away', 'not_found', { debug });
+        if (body?.lying && ['face_hidden', 'lying_hidden', 'angle', 'too_far'].includes(checked.reason))
+          return signal('unknown', 'lying_hidden', { checkEligible: true, debug });
+        const knownReading = p.readingHidden && Number.isFinite(body?.headRise) && Number.isFinite(p.readingHeadRise) &&
+          Math.abs(body.headRise - p.readingHeadRise) < .25;
+        if (knownReading && ['face_hidden', 'angle'].includes(checked.reason))
+          return signal('unknown', 'reading_limited', { debug });
+        return signal('unknown', checked.reason, { checkEligible: ['covered', 'face_hidden'].includes(checked.reason), debug });
       }
-      if (!checked.ok) return signal(checked.reason === 'not_found' ? 'away' : 'unknown', checked.reason,
-        { checkEligible: ['covered', 'lying_hidden', 'face_hidden'].includes(checked.reason) });
-      const f = checked.face, p = this.profile;
-      const frontDistance = poseDistance(f.pose, p.front.pose);
-      const readDistance = p.reading ? poseDistance(f.pose, p.reading.pose) : Infinity;
-      const yawNear = Math.min(Math.abs(f.pose.yaw - p.front.pose.yaw), p.reading ? Math.abs(f.pose.yaw - p.reading.pose.yaw) : Infinity);
-      // A different head angle is not drowsiness. Do not extrapolate a profile to
-      // a near-profile face or to a pose far outside either captured posture.
-      if (Math.min(frontDistance, readDistance) > 1.35 || yawNear > .65)
-        return signal('unknown', 'outside_pose');
-      let ref = p.profiles.safe;
-      if (!p.safe) {
-        if (frontDistance > .45 || readDistance < frontDistance + .25)
-          return signal('unknown', 'reading_limited');
-        ref = p.profiles.front;
+      debug.faceRoll = f.roll; debug.eyePixels = Math.min(f.left.width, f.right.width);
+      const df = poseDistance(f.pose, p.front.pose), dr = p.reading ? poseDistance(f.pose, p.reading.pose) : Infinity;
+      let ref = p.profiles.front;
+      if (p.profiles.shared) {
+        ref = p.profiles.shared; debug.profile = 'shared';
+      } else if (p.profiles.reading) {
+        // Smooth interpolation instead of abrupt front/reading thresholds.
+        const t = clamp((df - dr + .65) / 1.3, 0, 1);
+        ref = { left: blendRef(ref.left, p.profiles.reading.left, t), right: blendRef(ref.right, p.profiles.reading.right, t) };
+        debug.profile = t > .75 ? 'reading' : t < .25 ? 'front' : 'between';
+      } else {
+        debug.profile = 'front';
+        if ((p.reading && dr + .15 < df) || (!p.reading && df > 1.15)) {
+          this.history = []; return signal('unknown', 'reading_limited', { debug, checkEligible: !!body?.lying });
+        }
+      }
+      if (Math.min(df, p.profiles.reading ? dr : Infinity) > 2.6) {
+        this.history = []; return signal('unknown', body?.lying ? 'lying_hidden' : 'outside_pose', { debug, checkEligible: !!body?.lying });
       }
       const l = closure(f.left, f.blinkL, ref.left), r = closure(f.right, f.blinkR, ref.right);
-      if (!l.usable || !r.usable) return signal('unknown', 'unclear_eyes');
-      if (l.closed && r.closed) return signal('sleep', 'eyes_closed');
-      if (l.open || r.open) return signal('awake', readDistance + .15 < frontDistance ? 'reading' : 'eyes_open');
-      return signal('unknown', 'uncertain');
+      if (!l.usable || !r.usable) return signal('unknown', 'unclear_eyes', { debug });
+      this.history = this.history.filter(v => now - v.at <= 450);
+      this.history.push({ at: now, l: l.score, r: r.score });
+      if (this.history.length > 3) this.history.shift();
+      const ls = median(this.history.map(v => v.l)), rs = median(this.history.map(v => v.r));
+      debug.left = ls; debug.right = rs; debug.earLeft = f.left.ear; debug.earRight = f.right.ear;
+      debug.blinkLeft = f.blinkL; debug.blinkRight = f.blinkR;
+      if (ls >= .62 && rs >= .62) return signal('sleep', 'eyes_closed', { debug });
+      if (ls <= .30 || rs <= .30) return signal('awake', body?.lying ? 'lying_awake' : dr + .15 < df ? 'reading' : 'eyes_open', { debug });
+      return signal('unknown', body?.lying ? 'lying_hidden' : 'uncertain', { checkEligible: !!body?.lying, debug });
     }
   }
-  return Object.freeze({ Analyzer, Calibration, buildProfile, inspect, faceFeatures, bodyFeatures, eyeOcclusion, eyeAspect, median, quantile, closure });
+  return Object.freeze({ Analyzer, Calibration, buildProfile, inspect, faceFeatures, bodyFeatures,
+    eyeOcclusion, eyeAspect, median, quantile, closure, poseDistance });
 })();
+
 
 </script>
 <script>
@@ -1872,21 +1943,65 @@ const JoljimaSignals = (() => {
  * This function is also serialized into a classic Worker. Keep it self-contained.
  * MediaPipe runs locally; only model/SDK downloads go over the network.
  */
+/** Pure coordinate mapping plus lossless 90-degree canvas rotations.
+ * A rotated result is always brought back to the original, unmirrored image.
+ */
+function JoljimaFrameTools() {
+  const full = { x: 0, y: 0, w: 1, h: 1 };
+  function unrotate(p, angle, roi = full, width = 640, height = 480) {
+    const a = ((angle % 360) + 360) % 360;
+    let x = p.x, y = p.y;
+    if (a === 90) { x = p.y; y = 1 - p.x; }
+    if (a === 180) { x = 1 - p.x; y = 1 - p.y; }
+    if (a === 270) { x = 1 - p.y; y = p.x; }
+    const rw = a === 90 || a === 270 ? roi.h * height : roi.w * width;
+    return { ...p, x: roi.x + x * roi.w, y: roi.y + y * roi.h, z: (p.z ?? 0) * rw / width };
+  }
+  function mapGroups(groups, angle, roi, w, h) {
+    return (groups ?? []).map(group => group.map(p => unrotate(p, angle, roi, w, h)));
+  }
+  function bounds(points, w, h) {
+    if (!points?.length) return null;
+    const xs = points.map(p => p.x * w), ys = points.map(p => p.y * h);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const size = Math.min(Math.max(120, (Math.max(...xs) - Math.min(...xs)) * 1.85,
+      (Math.max(...ys) - Math.min(...ys)) * 1.85), Math.min(w, h));
+    const x = Math.max(0, Math.min(w - size, cx - size / 2)), y = Math.max(0, Math.min(h - size, cy - size / 2));
+    return { x: x / w, y: y / h, w: size / w, h: size / h };
+  }
+  function render(canvas, frame, angle, roi = full) {
+    const w = frame.width, h = frame.height, rw = roi.w * w, rh = roi.h * h;
+    const a = ((angle % 360) + 360) % 360, swap = a === 90 || a === 270;
+    const cw = Math.max(1, Math.round(swap ? rh : rw)), ch = Math.max(1, Math.round(swap ? rw : rh));
+    if (canvas.width !== cw) canvas.width = cw;
+    if (canvas.height !== ch) canvas.height = ch;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cw, ch);
+    ctx.translate(cw / 2, ch / 2); ctx.rotate(a * Math.PI / 180);
+    ctx.drawImage(frame, roi.x * w, roi.y * h, rw, rh, -rw / 2, -rh / 2, rw, rh);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    return canvas;
+  }
+  return { full, unrotate, mapGroups, bounds, render };
+}
+
+/** Worker-safe runtime. Downloads only model assets; never uploads video.
+ * VIDEO tracking is kept on the original orientation. A separate IMAGE task
+ * searches rotated/cropped inputs without contaminating that tracker state.
+ */
 async function JoljimaVisionRuntime(config, progress = () => {}, externalSignal = null) {
-  const tasks = [];
-  let face, pose, hand;
-  let latestPose = null, latestHand = null;
+  const tasks = [], tools = JoljimaFrameTools();
+  let face, recoveryFace, pose, hand, latestPose = null, latestHand = null;
   let poseAt = -Infinity, handAt = -Infinity, lastAt = -Infinity;
-  let closed = false;
-  const makeCanvas = () => typeof OffscreenCanvas !== 'undefined'
-    ? new OffscreenCanvas(24, 18) : Object.assign(document.createElement('canvas'), { width: 24, height: 18 });
-  const qualityCanvas = makeCanvas();
+  let recoveryAngle = 0, recoveryROI = null, recovering = false, lastFullProbe = -Infinity;
+  let lastBox = null, boxAt = -Infinity, cursor = 0, poseCursor = 0, closed = false;
+  const makeCanvas = () => typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(24, 18)
+    : Object.assign(document.createElement('canvas'), { width: 24, height: 18 });
+  const qualityCanvas = makeCanvas(), transformCanvas = makeCanvas(), bodyCanvas = makeCanvas();
   const qualityContext = qualityCanvas.getContext('2d', { willReadFrequently: true });
   const abort = new AbortController();
   const dispose = () => {
-    closed = true;
-    abort.abort();
-    externalSignal?.removeEventListener('abort', dispose);
+    closed = true; abort.abort(); externalSignal?.removeEventListener('abort', dispose);
     for (const task of tasks) { try { task.close(); } catch (_) {} }
     tasks.length = 0;
   };
@@ -1894,66 +2009,97 @@ async function JoljimaVisionRuntime(config, progress = () => {}, externalSignal 
   if (externalSignal?.aborted) dispose();
   async function modelBuffer(url) {
     if (closed) throw new Error('AI 연결이 취소됐어요.');
-    const controller = new AbortController();
-    const cancel = () => controller.abort();
+    const controller = new AbortController(), cancel = () => controller.abort();
     abort.signal.addEventListener('abort', cancel, { once: true });
     const timer = setTimeout(cancel, config.assetTimeoutMs);
     try {
       const response = await fetch(url, { signal: controller.signal, credentials: 'omit', cache: 'default', referrerPolicy: 'no-referrer' });
       if (!response.ok) throw new Error('모델 파일을 받지 못했어요. HTTP ' + response.status);
-      const size = Number(response.headers.get('content-length'));
-      if (size > 64 * 1024 * 1024) throw new Error('모델 파일 크기가 예상 범위를 벗어났어요.');
+      if (Number(response.headers.get('content-length')) > 64 * 1024 * 1024) throw new Error('모델 파일 크기가 예상 범위를 벗어났어요.');
       const buffer = await response.arrayBuffer();
       if (buffer.byteLength < 1024 || buffer.byteLength > 64 * 1024 * 1024) throw new Error('모델 파일 형식을 확인해 주세요.');
       return new Uint8Array(buffer);
-    } finally {
-      clearTimeout(timer);
-      abort.signal.removeEventListener('abort', cancel);
-    }
+    } finally { clearTimeout(timer); abort.signal.removeEventListener('abort', cancel); }
   }
   try {
     progress('AI 실행 도구를 불러오고 있어요.');
-    if (closed) throw new Error('AI 연결이 취소됐어요.');
     const library = await import(config.libraryUrl);
     if (closed) throw new Error('AI 연결이 취소됐어요.');
     const wasm = await library.FilesetResolver.forVisionTasks(config.wasmRoot);
     const entries = [
       ['face', library.FaceLandmarker, { numFaces: 2, outputFaceBlendshapes: true,
-        minFaceDetectionConfidence: .55, minFacePresenceConfidence: .6, minTrackingConfidence: .55 }, '얼굴 모델을 준비하고 있어요. 1 / 3'],
+        minFaceDetectionConfidence: .45, minFacePresenceConfidence: .5, minTrackingConfidence: .5 }, '얼굴과 회전 보정을 준비해요. 1 / 3'],
       ['pose', library.PoseLandmarker, { numPoses: 2, outputSegmentationMasks: false,
-        minPoseDetectionConfidence: .55, minPosePresenceConfidence: .6, minTrackingConfidence: .55 }, '몸 자세 모델을 준비하고 있어요. 2 / 3'],
+        minPoseDetectionConfidence: .45, minPosePresenceConfidence: .5, minTrackingConfidence: .5 }, '몸 자세를 준비해요. 2 / 3'],
       ['hand', library.HandLandmarker, { numHands: 2,
-        minHandDetectionConfidence: .55, minHandPresenceConfidence: .6, minTrackingConfidence: .55 }, '손 모델을 준비하고 있어요. 3 / 3'],
+        minHandDetectionConfidence: .5, minHandPresenceConfidence: .5, minTrackingConfidence: .5 }, '가림 확인을 준비해요. 3 / 3'],
     ];
     for (const [key, Constructor, options, message] of entries) {
-      if (closed) throw new Error('모델 연결이 취소됐어요.');
+      if (closed) throw new Error('AI 연결이 취소됐어요.');
       progress(message);
       const buffer = await modelBuffer(config.models[key]);
-      const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
-      const task = await Constructor.createFromOptions(wasm, {
-        ...options, canvas, runningMode: 'VIDEO',
-        baseOptions: { modelAssetBuffer: buffer, delegate: config.delegate },
-      });
-      if (closed) { task.close(); throw new Error('AI 연결이 취소됐어요.'); }
-      tasks.push(task);
-      if (key === 'face') face = task;
-      if (key === 'pose') pose = task;
-      if (key === 'hand') hand = task;
+      async function make(mode) {
+        const task = await Constructor.createFromOptions(wasm, { ...options, canvas: makeCanvas(), runningMode: mode,
+          baseOptions: { modelAssetBuffer: buffer, delegate: config.delegate } });
+        if (closed) { task.close(); throw new Error('AI 연결이 취소됐어요.'); }
+        tasks.push(task); return task;
+      }
+      if (key === 'face') { face = await make('VIDEO'); recoveryFace = await make('IMAGE'); }
+      if (key === 'pose') pose = await make('IMAGE');
+      if (key === 'hand') hand = await make('IMAGE');
     }
   } catch (error) { dispose(); throw error; }
-
+  function found(result) { return (result?.faceLandmarks?.length ?? 0) > 0; }
+  function recover(frame, angle, roi) {
+    const transformed = tools.render(transformCanvas, frame, angle, roi || tools.full);
+    const result = recoveryFace.detect(transformed);
+    return { ...result, faceLandmarks: tools.mapGroups(result.faceLandmarks, angle, roi || tools.full, frame.width, frame.height) };
+  }
   function detect(frame, at) {
     if (closed) throw new Error('AI 분석기가 종료됐어요.');
     if (!Number.isFinite(at) || at <= lastAt) throw new Error('프레임 시간이 올바르지 않아요.');
     lastAt = at;
-    const result = face.detectForVideo(frame, at);
-    if (at - poseAt >= config.bodyIntervalMs || !latestPose) {
-      latestPose = pose.detectForVideo(frame, at);
-      poseAt = at;
+    const start = performance.now();
+    let result = null, source = 'full', angle = 0;
+    if (!recovering || at - lastFullProbe >= 1400) {
+      result = face.detectForVideo(frame, at); lastFullProbe = at;
+      if (found(result)) { recovering = false; recoveryAngle = 0; recoveryROI = null; }
     }
-    if (at - handAt >= config.handIntervalMs || !latestHand) {
-      latestHand = hand.detectForVideo(frame, at);
-      handAt = at;
+    if (!found(result) && recovering) {
+      result = recover(frame, recoveryAngle, recoveryROI);
+      if (found(result)) { angle = recoveryAngle; source = recoveryROI ? 'crop-rotate' : 'rotate'; }
+      else recovering = false;
+    }
+    if (!found(result)) {
+      // At most one extra search per frame; stale frames cannot build a backlog.
+      const candidates = [90, 270, 180, 0];
+      const candidateAngle = candidates[cursor++ % candidates.length];
+      const roi = candidateAngle === 0 && lastBox && at - boxAt < 2200 ? lastBox : null;
+      const candidate = recover(frame, candidateAngle, roi);
+      if (found(candidate)) {
+        result = candidate; recovering = true; recoveryAngle = candidateAngle; recoveryROI = roi;
+        angle = candidateAngle; source = roi ? 'crop-rotate' : 'rotate';
+      }
+    }
+    result = result || { faceLandmarks: [], faceBlendshapes: [] };
+    if (result.faceLandmarks?.length === 1) {
+      lastBox = tools.bounds(result.faceLandmarks[0], frame.width, frame.height); boxAt = at;
+      if (recovering && recoveryROI) recoveryROI = lastBox;
+    }
+    if (at - poseAt >= config.bodyIntervalMs || latestPose === null) {
+      let poseAngle = recovering ? angle : 0;
+      let input = poseAngle ? tools.render(bodyCanvas, frame, poseAngle) : frame;
+      let body = pose.detect(input);
+      if (!body.landmarks?.length && !found(result)) {
+        poseAngle = [90, 270, 180, 0][poseCursor++ % 4];
+        body = pose.detect(tools.render(bodyCanvas, frame, poseAngle));
+      }
+      latestPose = tools.mapGroups(body.landmarks, poseAngle, tools.full, frame.width, frame.height); poseAt = at;
+    }
+    if (at - handAt >= config.handIntervalMs || latestHand === null) {
+      const handAngle = recovering ? angle : 0;
+      const input = handAngle ? tools.render(bodyCanvas, frame, handAngle) : frame;
+      latestHand = tools.mapGroups(hand.detect(input).landmarks, handAngle, tools.full, frame.width, frame.height); handAt = at;
     }
     let mean = 128, faceMean = null, faceContrast = null;
     if (qualityContext) {
@@ -1969,24 +2115,22 @@ async function JoljimaVisionRuntime(config, progress = () => {}, externalSignal 
         return { mean: average, contrast: Math.sqrt(Math.max(0, square / (pixels.length / 4) - average * average)) };
       };
       mean = sample(0, 0, frame.width, frame.height).mean;
-      const landmarks = result.faceLandmarks?.[0];
-      if (landmarks?.length) {
-        const xs = [10, 152, 234, 454].map(i => landmarks[i].x);
-        const ys = [10, 152, 234, 454].map(i => landmarks[i].y);
+      const p = result.faceLandmarks?.[0];
+      if (p?.length) {
+        const xs = [10, 152, 234, 454].map(i => p[i].x), ys = [10, 152, 234, 454].map(i => p[i].y);
         const x = Math.max(0, Math.min(...xs)), y = Math.max(0, Math.min(...ys));
         const w = Math.min(1, Math.max(...xs)) - x, h = Math.min(1, Math.max(...ys)) - y;
         if (w > .03 && h > .03) {
-          const local = sample(x * frame.width, y * frame.height, w * frame.width, h * frame.height);
-          faceMean = local.mean; faceContrast = local.contrast;
+          const q = sample(x * frame.width, y * frame.height, w * frame.width, h * frame.height);
+          faceMean = q.mean; faceContrast = q.contrast;
         }
       }
     }
-    return {
-      width: frame.width, height: frame.height, quality: { mean, faceMean, faceContrast },
+    return { width: frame.width, height: frame.height, quality: { mean, faceMean, faceContrast },
       faceLandmarks: result.faceLandmarks ?? [], faceBlendshapes: result.faceBlendshapes ?? [],
-      poseLandmarks: latestPose?.landmarks ?? [], poseAgeMs: at - poseAt,
-      handLandmarks: latestHand?.landmarks ?? [], handAgeMs: at - handAt,
-    };
+      poseLandmarks: latestPose ?? [], poseAgeMs: at - poseAt,
+      handLandmarks: latestHand ?? [], handAgeMs: at - handAt,
+      rotation: angle, faceSource: source, searching: !found(result), inferenceMs: performance.now() - start };
   }
   return { detect, close: dispose };
 }
@@ -2029,7 +2173,8 @@ class JoljimaDetector {
     return this;
   }
   loadWorker(progress) {
-    const source = `const createRuntime = ${JoljimaVisionRuntime.toString()};
+    const source = `const JoljimaFrameTools = ${JoljimaFrameTools.toString()};
+const createRuntime = ${JoljimaVisionRuntime.toString()};
 let runtime = null, busy = false;
 self.onmessage = async ({data}) => {
   if (data.type === 'init') {
@@ -2143,16 +2288,16 @@ self.onmessage = async ({data}) => {
   const show = (id, visible = true) => {
     if ($(id).hidden === visible) $(id).hidden = !visible;
   };
-  const storageKey = 'joljima.simple.settings.v1';
+  const storageKey = 'joljima.simple.settings.v4';
   let storage = null;
   try {
     storage = window.localStorage;
   } catch (_) {
   }
-  const settings = readSettings(storage, storageKey, 'jajima.simple.settings.v1');
+  const settings = readSettings(storage, storageKey, 'joljima.simple.settings.v1');
   const app = {
     screen: 'intro', live: true, session: 0, cameraRequest: 0,
-    profile: null, scan: null, uiCandidate: '', uiAt: 0,
+    diag: null, trace: [], returnToDiagnostic: false, profile: null, scan: null, uiCandidate: '', uiAt: 0,
     stream: null, model: null, modelPromise: null, cameraVisible: false,
     paused: false, panelOpen: false, frameId: 0, frameSerial: 0,
     processedFrame: -1, lastFrameAt: 0, lastVideoTime: -1,
@@ -2171,10 +2316,10 @@ self.onmessage = async ({data}) => {
   const videoHome = video.parentElement;
   const circleLength = 2 * Math.PI * 134;
   const routes = {
-    intro: 'introScreen', scan: 'scanScreen', monitor: 'monitorScreen', loading: 'loadingScreen', error: 'errorScreen', alarm: 'alarmScreen'
+    intro: 'introScreen', scan: 'scanScreen', diagnostic: 'diagnosticScreen', monitor: 'monitorScreen', loading: 'loadingScreen', error: 'errorScreen', alarm: 'alarmScreen'
   };
   const headings = {
-    intro: 'introTitle', scan: 'scanTitle', monitor: 'monitorTitle', loading: 'loadingTitle', error: 'errorTitle', alarm: 'alarmTitle'
+    intro: 'introTitle', scan: 'scanTitle', diagnostic: 'diagnosticTitle', monitor: 'monitorTitle', loading: 'loadingTitle', error: 'errorTitle', alarm: 'alarmTitle'
   };
   const clockIcon = $('liveDetail').querySelector('svg');
   const readoutValue = $('sleepReadout').firstChild;
@@ -2218,12 +2363,12 @@ self.onmessage = async ({data}) => {
   function setScreen(name, focus = true) {
     app.screen = name;
     document.body.dataset.screen = name;
-    const target = name === 'scan' ? $('scanCamera') : videoHome;
+    const target = name === 'scan' ? $('scanCamera') : name === 'diagnostic' ? $('diagnosticCamera') : videoHome;
     if (video.parentElement !== target) {
       target.prepend(video);
       if (app.stream) video.play().catch(() => {});
     }
-    if (name === 'scan') video.setAttribute('aria-hidden', 'false');
+    if (name === 'scan' || name === 'diagnostic') video.setAttribute('aria-hidden', 'false');
     for (const [key, id] of Object.entries(routes)) show(id, key === name);
     const monitor = name === 'monitor';
     show('credit', !monitor);
@@ -2234,6 +2379,7 @@ self.onmessage = async ({data}) => {
     let footer = '영상은 기기 안에서 분석해요.';
     if (monitor) footer = app.paused ? '잠시 멈춘 동안에는 카메라도 꺼져 있어요.' : app.live ? '감지하려면 이 화면을 열어 두세요.' : '영상은 기기 안에서 분석해요.';
     if (name === 'scan') footer = '사진 없이 숫자 기준만 이번 세션에 사용해요.';
+    if (name === 'diagnostic') footer = '새 카메라 입력으로 확인해요. 사진·영상은 저장하지 않아요.';
     if (name === 'alarm') footer = settings.sound ? '버튼을 누르면 알림이 멈춰요.' : '소리 없이 화면으로 알리고 있어요.';
     setText('footerText', footer);
     cancelAnimationFrame(app.focusId);
@@ -2251,6 +2397,10 @@ self.onmessage = async ({data}) => {
     const thresholdSeconds = kind === 'check' ? gate.checkSeconds : settings.seconds;
     if (renderKey !== key) {
       renderKey = key;
+      if (app.screen === 'monitor' && app.live && !app.paused) {
+        setText('modeTag', ['unknown','away'].includes(kind) ? '확인 제한' : kind === 'check' ? '자세 확인 중' : '눈 확인 중');
+        $('modeTag').classList.toggle('live', !['unknown','away'].includes(kind));
+      }
       $('visual').dataset.kind = kind;
       let [title, base] = messages[kind];
       const details = {
@@ -2259,11 +2409,13 @@ self.onmessage = async ({data}) => {
         glare: ['빛 반사를 줄여 주세요.', '카메라나 조명 방향을 조금 바꿔 주세요.'],
         multiple: ['한 사람만 확인할 수 있어요.', '지금은 판단을 멈췄어요.'],
         unclear_eyes: ['눈을 더 확인하고 있어요.', '확실하지 않을 때는 깨우지 않아요.'],
-        uncertain: ['눈을 더 확인하고 있어요.', '확실하지 않을 때는 깨우지 않아요.'],
+        uncertain: ['눈 감김을 다시 확인해요.', '짧은 흔들림은 시간을 지우지 않아요.'],
         covered: ['눈이 잠깐 가려졌어요.', '다시 보이면 이어서 확인해요.'],
-        lying_hidden: ['눈을 확인하기 어려워요.', '자세만으로 졸음이라고 판단하지 않아요.'],
-        face_hidden: ['눈을 확인하기 어려워요.', '보이지 않는 동안은 판단을 쉬어요.'],
-        angle: ['지금 각도에서는 잘 안 보여요.', '보이지 않는 동안은 판단을 쉬어요.'],
+        lying_hidden: ['누운 자세로 보여요.', '눈이 가려져 수면 여부는 확인하기 어려워요.'],
+        lying_awake: ['누워 있지만 눈은 떠 있어요.', '눈 감김이 이어지면 알려드려요.'],
+        head_down: ['머리가 크게 내려갔어요.', '눈이 보이지 않아 자세를 확인해요.'],
+        face_hidden: ['몸은 보이지만 눈이 안 보여요.', '각도를 바꿔 다시 찾고 있어요.'],
+        angle: ['양쪽 눈을 다시 찾고 있어요.', '옆얼굴이 심하면 확인이 어려워요.'],
         outside_pose: ['지금 자세는 확인이 어려워요.', '이 자세를 계속 쓴다면 설정에서 다시 스캔해 주세요.'],
         reading_limited: ['책 보는 자세를 확인 중이에요.', '눈 감김과 구분이 어려워 깨우지 않아요.'],
         too_far: ['카메라에서 조금 가까이 와 주세요.', '눈이 작게 잡혀서 판단을 쉬고 있어요.'],
@@ -2335,26 +2487,27 @@ self.onmessage = async ({data}) => {
     } catch (_) {}
   }
   function renderScan(status) {
-    const { phase, step, progress, reason, limited } = status;
-    const titles = ['평소처럼 눈을 떠 주세요.', '책을 보듯 아래를 봐 주세요.', '정면에서 눈을 감아 주세요.'];
+    const { phase, step, progress, reason, limited, total = 4 } = status;
+    const titles = ['평소처럼 눈을 떠 주세요.', '책을 보듯 아래를 봐 주세요.', '정면에서 눈을 감아 주세요.', '책 보는 자세로 눈을 감아 주세요.'];
     const descriptions = [
       '눈을 크게 뜨지 말고 편하게 정면을 봐 주세요.',
       '평소 공부하는 높이로 고개와 시선을 내려 주세요.',
-      settings.sound ? '버튼을 누른 뒤 감아 주세요. 끝나면 소리로 알려드려요.' : '버튼을 누른 뒤 천천히 다섯을 세고 눈을 떠 주세요.',
+      settings.sound ? '버튼을 누른 뒤 감아 주세요. 끝나면 소리로 알려드려요.' : '버튼을 누른 뒤 여섯을 세고 눈을 떠 주세요.',
+      settings.sound ? '아까 책 보던 높이로 고개를 내리고 눈만 감아 주세요. 끝나면 소리로 알려드려요.' : '책 보는 높이로 눈을 감고 여섯을 센 뒤 떠 주세요.',
     ];
     const hints = {
       multiple: '한 사람만 보이게 해 주세요.', dark: '눈 주변에 빛이 조금 더 필요해요.',
       glare: '조명이나 안경 반사를 줄여 주세요.', covered: '손으로 눈을 가리지 말아 주세요.',
       face_hidden: '스캔할 때는 얼굴이 보이게 해 주세요.', not_found: '얼굴이 카메라 안에 들어오게 해 주세요.',
       angle: '양쪽 눈이 보이게 살짝 돌아 주세요.', too_far: '카메라에 조금 더 가까이 와 주세요.',
-      closed_pose: '고개는 정면에 두고 눈만 감아 주세요.', close_eyes: '눈을 편하게 감아 주세요.',
+      reading_closed_pose: '아까 책 보던 높이에서 눈만 감아 주세요.', closed_pose: '고개는 정면에 두고 눈만 감아 주세요.', close_eyes: '눈을 편하게 감아 주세요.',
       reading_hidden: '이 자세에서 눈이 안 보이면 알리지 않아요.',
       stale: '새 카메라 화면을 기다리고 있어요.', settle: '자세를 맞추는 중…',
       lying_hidden: '스캔할 때는 얼굴이 보이게 해 주세요.',
     };
     const finished = phase === 'complete' || phase === 'failed';
     $('scanScreen').dataset.phase = phase;
-    setText('scanStep', finished ? '나에게 맞추기' : `나에게 맞추기 · ${step + 1} / 3`);
+    setText('scanStep', finished ? '나에게 맞추기' : `나에게 맞추기 · ${step + 1} / ${total}`);
     show('scanCamera', !finished); show('scanCompleteArt', finished); show('scanProgress', !finished);
     $('scanButton').disabled = phase === 'capture';
     if (finished) {
@@ -2363,11 +2516,12 @@ self.onmessage = async ({data}) => {
       const failures = {
         reading_overlap: '책 볼 때와 눈 감김이 비슷해요. 카메라를 조금 낮춰 다시 해 주세요.',
         closed_pose: '눈 감기 단계에서 고개가 움직였어요. 정면을 유지해 주세요.',
+        reading_closed_pose: '책 볼 때와 눈 감을 때 고개 높이가 달라요. 같은 높이로 다시 맞춰 주세요.',
         inseparable: '눈 뜸과 감김이 잘 구분되지 않았어요. 조명과 안경 반사를 확인해 주세요.',
       };
-      setText('scanSubtitle', success ? (limited ? '책 볼 때 눈이 구분되지 않으면 판단을 쉬어요.' : '내 눈 모양과 책 보는 자세를 기준으로 확인해요.') : (failures[reason] || '눈이 선명하게 보이는 위치에서 다시 해 주세요.'));
+      setText('scanSubtitle', success ? (limited ? '정면 기준을 맞췄어요. 책 보는 자세는 점검이 필요해요.' : '정면과 책 보는 기준을 따로 맞췄어요. 실제 인식을 확인해요.') : (failures[reason] || '눈이 선명하게 보이는 위치에서 다시 해 주세요.'));
       $('scanCompleteArt').querySelector('path').setAttribute('d', success ? 'm15 28 9 9 18-19' : 'M28 15v18m0 8h.01');
-      $('scanButton').firstChild.nodeValue = success ? '감지 시작' : '다시 스캔';
+      $('scanButton').firstChild.nodeValue = success ? '인식 점검' : '다시 스캔';
       return;
     }
     setText('scanTitle', titles[step]);
@@ -2379,7 +2533,7 @@ self.onmessage = async ({data}) => {
     const percent = Math.round(progress * 100);
     $('scanProgressFill').style.width = percent + '%';
     $('scanProgress').setAttribute('aria-valuenow', String(percent));
-    $('scanButton').firstChild.nodeValue = phase === 'capture' ? '스캔 중…' : phase === 'retry' ? '다시 해보기' : ['정면 스캔', '책 보는 자세 스캔', '눈 감김 스캔'][step];
+    $('scanButton').firstChild.nodeValue = phase === 'capture' ? '스캔 중…' : phase === 'retry' ? '다시 해보기' : ['정면 스캔', '책 보는 자세 스캔', '눈 감김 스캔', '책 보는 눈 감김 스캔'][step];
   }
   function beginScan() {
     haltLoop(); stopAudio();
@@ -2394,11 +2548,11 @@ self.onmessage = async ({data}) => {
       app.profile = app.scan.profile;
       app.model.setProfile(app.profile);
       app.scan = null; haltLoop(); stopAudio(); cameraUI(false);
-      setScreen('monitor'); renderState('awake'); requestWakeLock(); startLoop();
+      setScreen('monitor'); beginDiagnostic();
     } else if (app.scan.phase === 'failed') beginScan();
     else if (app.scan.phase !== 'capture') {
       primeAudio();
-      if (app.scan.step === 2) speakScan('정면에서 눈을 편하게 감아 주세요.');
+      if (app.scan.step >= 2) speakScan(app.scan.step === 2 ? '정면에서 눈을 편하게 감아 주세요.' : '책 보는 자세로 눈을 편하게 감아 주세요.');
       app.scan.start(performance.now()); renderScan(app.scan.status('settle')); startLoop();
     }
   });
@@ -2410,6 +2564,133 @@ self.onmessage = async ({data}) => {
   });
   $('checkInput').addEventListener('change', event => {
     settings.checkAlerts = event.target.checked; gate.reset(); saveSettings();
+  });
+
+    // Live diagnostics use NEW camera frames, independent of calibration samples.
+  // A pass is never fabricated from training data or from a simulated response.
+  const diagLabels = {
+    eyes_closed: '양쪽 눈 감김', eyes_open: '눈 뜸', reading: '책 보는 중', lying_awake: '누운 자세 · 눈 뜸',
+    lying_hidden: '누운 자세 · 눈 확인 어려움', covered: '눈 가림', uncertain: '눈 판단 불확실',
+    unclear_eyes: '눈 측정 어려움', outside_pose: '스캔 범위 밖', angle: '한쪽 눈이 가려진 각도',
+    face_hidden: '몸은 보이지만 눈이 안 보임', not_found: '사람 확인 어려움', too_far: '눈이 작게 촬영됨',
+    dark: '너무 어두움', glare: '빛 반사', reading_limited: '책 보는 자세의 눈 측정 제한',
+    multiple: '여러 사람', needs_scan: '스캔 필요', stale: '새 영상 없음', head_down: '머리를 크게 숙임'
+  };
+  function beginDiagnostic() {
+    if (!app.model || !app.stream || !app.profile || document.hidden) return;
+    clearTimeout(app.diag?.timeoutId);
+    app.panelOpen = false; app.paused = false; app.cooldownUntil = 0; app.diag = { running: false, results: [], current: null };
+    delete $('diagOutcome').dataset.result;
+    setScreen('diagnostic'); if (dialog.open) dialog.close();
+    setText('diagOutcome', '새로 들어오는 카메라 화면으로 검사해요.');
+    $('diagnosticCase').disabled = false; $('diagnosticStart').disabled = false;
+    app.model.resetSession(); gate.reset(); requestWakeLock(); startLoop();
+  }
+  function startDiagnosticCase() {
+    if (app.screen !== 'diagnostic' || app.diag?.running) return;
+    primeAudio(); gate.reset(); app.model.resetSession(); app.cooldownUntil = 0;
+    delete $('diagOutcome').dataset.result;
+    const name = $('diagnosticCase').value;
+    const seconds = name === 'covered' ? gate.checkSeconds + 4 : /Closed|closed/.test(name) ? settings.seconds + 5 : 6;
+    app.diag.running = true;
+    app.diag.current = { name, start: performance.now() + 1600, duration: seconds * 1000,
+      total: 0, matching: 0, observable: 0, lying: 0, reading: 0, alerts: 0, maxClosedMs: 0, reasons: {} };
+    $('diagnosticCase').disabled = true; $('diagnosticStart').disabled = true;
+    clearTimeout(app.diag.timeoutId);
+    app.diag.timeoutId = setTimeout(() => {
+      if (app.screen === 'diagnostic' && app.diag?.running) finishDiagnostic(false, 'stale');
+    }, seconds * 1000 + 4200);
+    const sleepy = /Closed|closed/.test(name);
+    setText('diagOutcome', sleepy ? '눈을 감고 유지해 주세요. 실제 알림이 나와야 통과해요.' : '선택한 모습을 유지해 주세요.');
+    setText('diagnosticHint', sleepy ? '알림을 확인한 뒤 눈을 떠 주세요.' : '책·자세를 평소처럼 유지해 주세요.');
+    try {
+      if (settings.sound && 'speechSynthesis' in window) {
+        speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(sleepy ? '선택한 자세에서 눈을 감아 주세요.' : '선택한 자세를 유지해 주세요.');
+        u.lang = 'ko-KR'; speechSynthesis.speak(u);
+      }
+    } catch (_) {}
+  }
+  function finishDiagnostic(triggered, reason = '') {
+    const d = app.diag?.current;
+    if (!d || !app.diag.running) return;
+    clearTimeout(app.diag.timeoutId);
+    const sleepy = /Closed|closed/.test(d.name), expectLying = d.name.startsWith('lying');
+    const coverage = d.observable / Math.max(1, d.total), match = d.matching / Math.max(1, d.total);
+    const lying = d.lying / Math.max(1, d.total);
+    const enough = d.total >= 5;
+    const closedOK = triggered && reason === 'eyes_closed';
+    let pass = enough && (sleepy ? closedOK : d.name === 'covered' ? triggered && reason === 'covered' : !triggered && coverage >= .75 && match >= .75);
+    if (expectLying && lying < .45) pass = false;
+    if (d.name.startsWith('reading') && d.reading / Math.max(1, d.total) < .45) pass = false;
+    const dominant = Object.entries(d.reasons).sort((a, b) => b[1] - a[1])[0]?.[0] || reason;
+    let note = pass ? (sleepy ? '눈 감김과 화면 알림을 확인했어요. 소리도 직접 확인해 주세요.' : '이 장면의 점검 기준을 통과했어요.') :
+      expectLying && lying < .45 ? '눈 판단과 별개로, 누운 몸 자세는 충분히 잡히지 않았어요. 상반신이 보이게 맞춰 주세요.' :
+      sleepy ? '눈 감김 알림까지 이어지지 않았어요. 아래 점수와 판단 사유를 확인해 주세요.' :
+      '인식이 충분히 이어지지 않았거나 잘못된 알림이 발생했어요.';
+    if (!pass && dominant) note += ' 주된 상태: ' + (diagLabels[dominant] || dominant) + '.';
+    const report = { case: d.name, passed: pass, cameraSamples: d.total,
+      observableRatio: coverage, matchingRatio: match, lyingRatio: lying,
+      maxClosedSeconds: d.maxClosedMs / 1000, actualAlarm: triggered ? reason : null,
+      reasons: d.reasons, note, at: new Date().toISOString() };
+    app.diag.results.push(report); app.diag.running = false;
+    setText('diagOutcome', (pass ? '확인됨 · ' : '보완 필요 · ') + note);
+    $('diagOutcome').dataset.result = pass ? 'pass' : 'fail';
+    $('diagnosticCase').disabled = false; $('diagnosticStart').disabled = false;
+    $('diagnosticStart').firstChild.nodeValue = '다시 점검';
+    setText('diagnosticHint', '다른 자세도 각각 확인할 수 있어요.');
+  }
+  function updateDiagnostic(raw, values, result, now) {
+    const debug = values.debug ?? {};
+    // Bounded numeric log only. No screenshots, images or raw landmark arrays.
+    app.trace.push({ at: Math.round(now), kind: values.kind, reason: values.reason,
+      eyes: [debug.left, debug.right], ear: [debug.earLeft, debug.earRight],
+      blink: [debug.blinkLeft, debug.blinkRight], reference: debug.profile,
+      posture: debug.posture, face: debug.faceFound, body: debug.bodyFound,
+      source: debug.source, rotation: debug.rotation, latencyMs: Math.round(raw.inferenceMs || 0),
+      alarmSeconds: +(result.sleepMs / 1000).toFixed(2), trigger: result.trigger });
+    if (app.trace.length > 600) app.trace.shift();
+    if (app.screen !== 'diagnostic') return;
+    const percent = v => Number.isFinite(v) ? Math.round(v * 100) : '—';
+    setText('diagEyes', percent(debug.left) + ' / ' + percent(debug.right));
+    setText('diagTime', (result.sleepMs / 1000).toFixed(1) + '초' + (result.kind === 'check' ? ' · 확인 알림' : ''));
+    setText('diagState', diagLabels[values.reason] || values.reason || '확인 중');
+    setText('diagPosture', debug.posture === 'lying' ? '누운 형태' : debug.bodyFound ? '몸 확인됨' : '몸 확인 어려움');
+    setText('diagTechnical', '2026.09.14-r4 · ' + (debug.source || 'full') + ' · 회전 ' + (debug.rotation || 0) + '° · 처리 ' + Math.round(raw.inferenceMs || 0) + 'ms · ' +
+      (debug.profile === 'shared' ? '정면·독서 공통 기준' : debug.profile === 'reading' ? '독서 기준' : debug.profile === 'between' ? '중간 자세 기준' : '정면 기준') +
+      ' · 오디오 ' + (settings.sound ? (app.audio?.state || '미연결') : '꺼짐'));
+    if (!app.diag?.running) return;
+    const d = app.diag.current;
+    if (now < d.start) { gate.reset(); return; }
+    const sleepy = /Closed|closed/.test(d.name);
+    d.total++;
+    if (debug.left !== null && debug.left !== undefined && debug.right !== null && debug.right !== undefined) d.observable++;
+    if (debug.posture === 'lying') d.lying++;
+    if (['reading','shared'].includes(debug.profile)) d.reading++;
+    if (sleepy ? values.kind === 'sleep' : d.name === 'covered' ? values.reason === 'covered' : values.kind === 'awake') d.matching++;
+    d.maxClosedMs = Math.max(d.maxClosedMs, result.sleepMs);
+    d.reasons[values.reason] = (d.reasons[values.reason] || 0) + 1;
+    const remaining = Math.max(0, Math.ceil((d.duration - (now - d.start)) / 1000));
+    setText('diagnosticHint', remaining + '초 남았어요. 선택한 모습을 유지해 주세요.');
+    if (result.trigger) { finishDiagnostic(true, values.reason); beginAlarm(false, values.reason); }
+    else if (now - d.start >= d.duration) finishDiagnostic(false);
+  }
+  $('diagnosticStart').addEventListener('click', startDiagnosticCase);
+  $('diagnosticDone').addEventListener('click', () => {
+    clearTimeout(app.diag?.timeoutId);
+    if (app.diag) app.diag.running = false;
+    stopAudio(); gate.reset(); app.model?.resetSession(); cameraUI(false); setScreen('monitor');
+    renderState('unknown'); startLoop();
+  });
+  $('diagnosticButton').addEventListener('click', beginDiagnostic);
+  $('exportDiagnostic').addEventListener('click', () => {
+    const content = { build: '2026.09.14-r4', sdk: JOLJIMA_VISION.version, settings,
+      testing: 'Real browser input log. Not a population accuracy measurement.',
+      modelInferenceValidatedInBuildEnvironment: false,
+      checks: app.diag?.results || [], samples: app.trace };
+    const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'joljima-diagnostics.json'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 
   // ── 카메라 수명과 새 프레임 추적 ──────────────────────────────
@@ -2505,7 +2786,7 @@ self.onmessage = async ({data}) => {
       for (const track of stream.getVideoTracks()) {
         const ended = () => {
           if (app.stream !== stream) return;
-          if (app.live && ['monitor', 'scan', 'alarm'].includes(app.screen)) {
+          if (app.live && ['monitor', 'scan', 'diagnostic', 'alarm'].includes(app.screen)) {
             pauseSession();
             toast('카메라 연결이 끊겼어요. 연결 후 이어서 해 주세요.');
           } else {
@@ -2604,11 +2885,11 @@ self.onmessage = async ({data}) => {
   }
   function startLoop() {
     haltLoop();
-    if (!app.live || app.paused || app.panelOpen || !['monitor', 'scan'].includes(app.screen)) return;
+    if (!app.live || app.paused || app.panelOpen || !['monitor', 'scan', 'diagnostic'].includes(app.screen)) return;
     const run = app.runId;
     const session = app.session;
     const current = () => run === app.runId && session === app.session &&
-    ['monitor', 'scan'].includes(app.screen) && !app.paused && !app.panelOpen && !document.hidden;
+    ['monitor', 'scan', 'diagnostic'].includes(app.screen) && !app.paused && !app.panelOpen && !document.hidden;
     const schedule = (delay = JOLJIMA_LIMITS.sampleIntervalMs) => {
       if (current()) app.loopId = setTimeout(tick, delay);
     };
@@ -2637,6 +2918,7 @@ self.onmessage = async ({data}) => {
         if (now - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs) {
           gate.reset();
           if (app.screen === 'scan') renderScan(app.scan.status('stale'));
+          else if (app.screen === 'diagnostic') setText('diagState','새 카메라 화면 없음');
           else renderState('unknown');
         }
         schedule();
@@ -2661,12 +2943,15 @@ self.onmessage = async ({data}) => {
         ended - app.lastFrameAt > JOLJIMA_LIMITS.maxFrameGapMs || ended < app.cooldownUntil) {
           gate.reset();
           if (app.screen === 'scan') renderScan(app.scan.status('stale'));
+          else if (app.screen === 'diagnostic') setText('diagState','새 카메라 화면 없음');
           else renderState('unknown');
         } else {
           // 추론 완료 시각 대신 실제 입력을 읽은 시각으로 연속 시간을 계산합니다.
           if (app.screen === 'scan') {
+            const previousStep = app.scan.step;
             const status = app.scan.observe(raw, capturedAt);
             renderScan(status);
+            if (status.step !== previousStep && previousStep >= 2) speakScan('눈을 떠 주세요. 다음 자세를 맞출게요.');
             if (status.phase === 'complete' || status.phase === 'failed') {
               haltLoop();
               speakScan(status.phase === 'complete' ? '스캔이 끝났어요. 눈을 떠 주세요.' : '눈을 떠 주세요. 스캔을 다시 확인할게요.');
@@ -2677,8 +2962,12 @@ self.onmessage = async ({data}) => {
             app.lastObservation = values;
             const kind = settings.checkAlerts && values.checkEligible ? 'check' : values.kind;
             const result = gate.observe(kind, capturedAt, values.reason);
-            renderObservation(result, values.reason, ended);
-            if (result.trigger) { beginAlarm(false, values.reason); return; }
+            updateDiagnostic(raw, values, result, capturedAt);
+            if (app.screen === 'alarm') return;
+            if (app.screen === 'monitor') {
+              renderObservation(result, values.reason, ended);
+              if (result.trigger) { beginAlarm(false, values.reason); return; }
+            }
           }
         }
       } catch (error) {
@@ -2701,7 +2990,7 @@ self.onmessage = async ({data}) => {
     try {
       const lock = await navigator.wakeLock.request('screen');
       if (version !== app.wakeVersion || document.hidden ||
-      !['monitor', 'scan', 'alarm'].includes(app.screen) || app.paused) {
+      !['monitor', 'scan', 'diagnostic', 'alarm'].includes(app.screen) || app.paused) {
         await lock.release();
         return;
       }
@@ -2757,11 +3046,13 @@ self.onmessage = async ({data}) => {
     }
     app.audioNodes.clear();
   }
-  function alarmSound() {
+  async function alarmSound() {
     if (!settings.sound || app.screen !== 'alarm' || document.hidden) return;
     primeAudio();
     try {
       const audio = app.audio;
+      if (audio?.state === 'suspended') { try { await audio.resume(); } catch (_) {} }
+      if (app.screen !== 'alarm' || document.hidden || !settings.sound) return;
       if (audio && audio.state === 'running') {
         [0, .23, .46].forEach((offset, index) => {
           const oscillator = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime + offset;
@@ -2811,7 +3102,8 @@ self.onmessage = async ({data}) => {
 
   // ── 세션 전환 · 이벤트 ────────────────────────────────────────
   function beginAlarm(test, reason = 'eyes_closed') {
-    if (app.screen !== 'monitor' || app.paused || document.hidden) return;
+    if (!['monitor','diagnostic'].includes(app.screen) || app.paused || document.hidden) return;
+    app.returnToDiagnostic = app.screen === 'diagnostic';
     haltLoop();
     stopAudio();
     app.alarmTest = test;
@@ -2838,13 +3130,15 @@ self.onmessage = async ({data}) => {
     gate.reset();
     app.cooldownUntil = app.alarmTest ? 0 : performance.now() + JOLJIMA_LIMITS.cooldownMs;
     app.alarmTest = false;
-    setScreen('monitor');
-    renderState(app.live ? 'unknown' : 'preview');
+    const back = app.returnToDiagnostic ? 'diagnostic' : 'monitor';
+    app.returnToDiagnostic = false;
+    setScreen(back);
+    if (back === 'monitor') renderState(app.live ? 'unknown' : 'preview');
     if (app.live) {
       const session = app.session;
       withTimeout(video.play(), JOLJIMA_LIMITS.playbackTimeoutMs, '카메라 재생을 다시 확인해 주세요.')
       .then(() => {
-        if (session === app.session && app.screen === 'monitor') startLoop();
+        if (session === app.session && ['monitor','diagnostic'].includes(app.screen)) startLoop();
       })
       .catch(() => {
         if (session === app.session) pauseSession();
@@ -2869,7 +3163,7 @@ self.onmessage = async ({data}) => {
     app.alarmTest = false;
     app.cooldownUntil = 0;
     app.profile = null;
-    app.scan = null;
+    app.scan = null; clearTimeout(app.diag?.timeoutId); app.diag = null; app.trace = []; app.returnToDiagnostic = false;
     releaseModel();
     setScreen('intro');
     syncSettings();
@@ -2921,8 +3215,10 @@ self.onmessage = async ({data}) => {
     }
   }
   function pauseSession() {
-    if (!['monitor', 'scan', 'loading', 'alarm'].includes(app.screen)) return;
+    if (!['monitor', 'scan', 'diagnostic', 'loading', 'alarm'].includes(app.screen)) return;
     if (app.screen === 'loading') releaseModel();
+    clearTimeout(app.diag?.timeoutId);
+    if (app.diag) app.diag.running = false;
     app.session++;
     app.paused = true;
     app.panelOpen = false;
@@ -2969,6 +3265,7 @@ self.onmessage = async ({data}) => {
   $('delayInput').addEventListener('change', saveSettings);
   $('soundInput').addEventListener('change', event => {
     settings.sound = event.target.checked;
+    if (settings.sound) primeAudio();
     syncSettings();
     saveSettings();
   });
