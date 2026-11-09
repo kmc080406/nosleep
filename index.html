@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ko" data-build="2026.09.14-r5">
+<html lang="ko" data-build="2026.11.09-r5.1">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
@@ -1307,9 +1307,9 @@ dialog::backdrop {
 <h2 class="settings-title" id="settingsTitle">알림 설정</h2>
 <div class="setting-row"><div class="setting-label"><label for="delayInput">몇 초 뒤 깨울까요?</label><output class="setting-value" for="delayInput" id="delayValue">5초</output></div><input aria-describedby="delayHelp" class="range" id="delayInput" max="30" min="2" step="1" type="range" value="5"/><div class="range-ends" id="delayHelp"><span>2초</span><span>30초</span></div></div>
 <div class="setting-row sound-setting"><div class="setting-label"><label for="soundInput">소리로 깨우기</label><span class="switch"><input checked="" id="soundInput" type="checkbox"/><span aria-hidden="true" class="switch-track"></span></span></div></div>
-<div class="setting-row"><div class="setting-label"><label for="checkInput">누움·가림 확인 알림</label><span class="switch"><input id="checkInput" type="checkbox" aria-describedby="checkHelp"/><span aria-hidden="true" class="switch-track"></span></span></div><p class="setting-caption" id="checkHelp">몸·손으로 누움이나 가림이 확인되면 10초 뒤 알려요. 수면 알림과는 별개예요.</p></div>
+<div class="setting-row"><div class="setting-label"><label for="checkInput">누움·가림 확인 알림</label><span class="switch"><input id="checkInput" type="checkbox" aria-describedby="checkHelp"/><span aria-hidden="true" class="switch-track"></span></span></div><p class="setting-caption" id="checkHelp">몸·손으로 누움이나 가림이 확인되면 설정한 시간 뒤 알려요. 수면 알림과는 별개예요.</p></div>
 <div class="settings-tools"><button class="test-button" id="rescanButton"><svg><use href="#i-camera"/></svg>다시 스캔</button><button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button></div>
-<p class="build-label">2026.09.14 · r5</p><p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
+<p class="build-label">2026.11.09 · r5.1</p><p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
 <button class="primary done-button" id="settingsDone">완료</button>
 </dialog>
 <div class="toast" hidden="" id="toast" role="status"></div>
@@ -1370,8 +1370,10 @@ const JoljimaCore = (() => {
    */
   class DrowsinessGate {
     constructor(seconds = 5, maxGapMs = 1500) {
-      this.seconds = seconds; this.maxGapMs = maxGapMs; this.checkSeconds = 10; this.reset();
+      this.seconds = seconds; this.maxGapMs = maxGapMs; this.reset();
     }
+    // Both alert types must honor the current user-selected interval.
+    get checkSeconds() { return this.seconds; }
     reset() {
       this.lastAt = null; this.lastKind = 'unknown'; this.lastReason = '';
       this.sleepMs = 0; this.checkMs = 0; this.episodeAt = null;
