@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ko" data-build="2026.11.09-r5.1">
+<html lang="ko" data-build="2026.11.09-r5.2">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
@@ -1263,7 +1263,7 @@ dialog::backdrop {
 <h1 id="introTitle" tabindex="-1"><span>졸면,</span><span>깨워드릴게요.</span></h1>
 <p class="subtitle" id="introSubtitle">졸음이 5초 이어지면 알려드려요.</p>
 <button class="primary" id="startButton">시작하기<svg><use href="#i-arrow"></use></svg></button>
-<p class="intro-note" id="introNote">먼저 내 눈과 책 보는 자세를 맞춰요.</p>
+<p class="intro-note" id="introNote">맞춤 스캔하거나 바로 시작할 수 있어요.</p>
 <p class="creator">made by 김민찬</p>
 </div>
 </section>
@@ -1274,7 +1274,7 @@ dialog::backdrop {
 <p class="subtitle" id="scanSubtitle">눈을 크게 뜨지 말고 편하게 정면을 봐 주세요.</p>
 <div class="scan-camera" id="scanCamera"><div class="scan-guide" aria-hidden="true"></div><span class="scan-eye" id="scanLeftEye" hidden aria-hidden="true"></span><span class="scan-eye" id="scanRightEye" hidden aria-hidden="true"></span><span class="scan-countdown" id="scanCountdown" hidden aria-hidden="true"></span><span class="scan-quality" id="scanQuality" role="status">카메라를 확인하고 있어요.</span></div>
 <div class="scan-progress" id="scanProgress" role="progressbar" aria-label="현재 단계 스캔 진행" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="scanProgressFill"></span></div>
-<div class="scan-actions"><button class="primary" id="scanButton">정면 스캔<svg><use href="#i-arrow"/></svg></button><button class="text-button" id="scanCancelButton">취소</button></div>
+<div class="scan-actions"><button class="primary" id="scanButton">정면 스캔<svg><use href="#i-arrow"/></svg></button><button class="text-button" id="scanSkipButton">스캔 건너뛰기</button><button class="text-button" id="scanCancelButton">취소</button></div>
 </section>
 
 <section aria-labelledby="monitorTitle" class="screen monitor" hidden="" id="monitorScreen">
@@ -1309,7 +1309,7 @@ dialog::backdrop {
 <div class="setting-row sound-setting"><div class="setting-label"><label for="soundInput">소리로 깨우기</label><span class="switch"><input checked="" id="soundInput" type="checkbox"/><span aria-hidden="true" class="switch-track"></span></span></div></div>
 <div class="setting-row"><div class="setting-label"><label for="checkInput">누움·가림 확인 알림</label><span class="switch"><input id="checkInput" type="checkbox" aria-describedby="checkHelp"/><span aria-hidden="true" class="switch-track"></span></span></div><p class="setting-caption" id="checkHelp">몸·손으로 누움이나 가림이 확인되면 설정한 시간 뒤 알려요. 수면 알림과는 별개예요.</p></div>
 <div class="settings-tools"><button class="test-button" id="rescanButton"><svg><use href="#i-camera"/></svg>다시 스캔</button><button class="test-button" id="testAlarmButton"><svg><use href="#i-volume"></use></svg>알림 확인하기</button></div>
-<p class="build-label">2026.11.09 · r5.1</p><p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
+<p class="build-label">2026.11.09 · r5.2</p><p class="settings-help">책을 보거나 고개를 숙인 것만으로 깨우지 않아요.<br/>안경·카메라 위치가 바뀌면 다시 스캔해 주세요.<br/>스캔 건너뛰기는 기본 기준으로 감지하므로 정확도가 낮을 수 있어요.<br/>이 탭에서만 작동하며 수면 진단·운전용이 아니에요.</p>
 <button class="primary done-button" id="settingsDone">완료</button>
 </dialog>
 <div class="toast" hidden="" id="toast" role="status"></div>
@@ -1946,14 +1946,14 @@ const JoljimaSignals = (() => {
     return r.ear || r.blink ? r : t < .5 ? a : b;
   }
   class Analyzer {
-    constructor() { this.profile = null; this.reset(); }
+    constructor() { this.profile = null; this.quickMode = false; this.reset(); }
     reset() { this.lastAt = null; this.history = []; }
-    setProfile(profile) { this.profile = profile?.version === 3 ? profile : null; this.reset(); }
+    setProfile(profile, quickMode = false) { this.profile = profile?.version === 3 ? profile : null; this.quickMode = !this.profile && quickMode === true; this.reset(); }
     analyze(raw, now) {
       if (!Number.isFinite(now) || now < 0) return signal('unknown', 'unavailable');
       if (this.lastAt !== null && now <= this.lastAt) return signal('unknown', 'stale');
       this.lastAt = now;
-      if (!this.profile) return signal('unknown', 'needs_scan');
+      if (!this.profile && !this.quickMode) return signal('unknown', 'needs_scan');
       const checked = inspect(raw), f = checked.face, body = checked.body, p = this.profile;
       const debug = { rotation: raw.rotation ?? 0, source: raw.faceSource ?? 'full',
         faceFound: !!f, bodyFound: !!body?.present, posture: body?.lying ? 'lying' : 'upright_or_unknown',
@@ -1963,13 +1963,37 @@ const JoljimaSignals = (() => {
         if (checked.reason === 'not_found') return signal('away', 'not_found', { debug });
         if (body?.lying && ['face_hidden', 'lying_hidden', 'angle', 'too_far'].includes(checked.reason))
           return signal('unknown', 'lying_hidden', { checkEligible: true, debug });
-        const knownReading = p.readingHidden && Number.isFinite(body?.headRise) && Number.isFinite(p.readingHeadRise) &&
+        const knownReading = p?.readingHidden && Number.isFinite(body?.headRise) && Number.isFinite(p.readingHeadRise) &&
           Math.abs(body.headRise - p.readingHeadRise) < .25;
         if (knownReading && ['face_hidden', 'angle'].includes(checked.reason))
           return signal('unknown', 'reading_limited', { debug });
         return signal('unknown', checked.reason, { checkEligible: ['covered', 'face_hidden'].includes(checked.reason), debug });
       }
       debug.faceRoll = f.roll; debug.eyePixels = Math.min(f.left.width, f.right.width);
+      // Optional quick-start: score both eye closures conservatively using the
+      // published model's generic blendshapes and landmark geometry.
+      // This is a fallback, not personalized calibration.
+      if (this.quickMode && !p) {
+        debug.profile = 'basic';
+        const score = (eye, blink) => {
+          if (!Number.isFinite(eye?.ear)) return null;
+          const geometry = clamp((.20 - eye.ear) / .12, 0, 1);
+          return Number.isFinite(blink) ? clamp(.78 * blink + .22 * geometry, 0, 1)
+            : eye.ear < .055 ? .72 : eye.ear > .18 ? .15 : .5;
+        };
+        const left = score(f.left, f.blinkL), right = score(f.right, f.blinkR);
+        if (left === null || right === null) return signal('unknown', 'unclear_eyes', { debug });
+        this.history = this.history.filter(v => now - v.at <= 450);
+        this.history.push({ at: now, l: left, r: right });
+        if (this.history.length > 3) this.history.shift();
+        const ls = median(this.history.map(v => v.l)), rs = median(this.history.map(v => v.r));
+        debug.left = ls; debug.right = rs;
+        debug.earLeft = f.left.ear; debug.earRight = f.right.ear;
+        debug.blinkLeft = f.blinkL; debug.blinkRight = f.blinkR;
+        if (ls >= .64 && rs >= .64) return signal('sleep', 'eyes_closed', { debug });
+        if (ls <= .37 || rs <= .37) return signal('awake', body?.lying ? 'lying_awake' : 'eyes_open', { debug });
+        return signal('unknown', body?.lying ? 'lying_hidden' : 'uncertain', { checkEligible: !!body?.lying, debug });
+      }
       const df = poseDistance(f.pose, p.front.pose), dr = p.reading ? poseDistance(f.pose, p.reading.pose) : Infinity;
       let ref = p.profiles.front;
       if (p.profiles.shared) {
@@ -2333,7 +2357,7 @@ self.onmessage = async ({data}) => {
     } finally { this.reading = false; }
   }
   async predict(canvas, at) { return this.analyzer.analyze(await this.readFrame(canvas, at), at); }
-  setProfile(profile) { this.analyzer.setProfile(profile); }
+  setProfile(profile, quickMode = false) { this.analyzer.setProfile(profile, quickMode); }
   resetSession() { this.analyzer.reset(); }
   close() {
     if (this.closed) return;
@@ -2380,7 +2404,7 @@ self.onmessage = async ({data}) => {
   const app = {
     screen: 'intro', live: true, session: 0, cameraRequest: 0,
     scanWatch: 0, scanRenderKey: '', audioEpoch: 0, profile: null, scan: null, uiCandidate: '', uiAt: 0,
-    stream: null, model: null, modelPromise: null, cameraVisible: false,
+    stream: null, model: null, modelPromise: null, cameraVisible: false, quickMode: false,
     paused: false, panelOpen: false, frameId: 0, frameSerial: 0,
     processedFrame: -1, lastFrameAt: 0, lastVideoTime: -1,
     loopId: 0, runId: 0, cooldownUntil: 0, alarmTest: false,
@@ -2434,7 +2458,7 @@ self.onmessage = async ({data}) => {
     $('checkInput').checked = settings.checkAlerts;
     setText('introSubtitle', '졸음이 ' + settings.seconds + '초 이어지면 알려드려요.');
     setText('delayLabel', settings.seconds + '초 후 알림' + (settings.sound ? '' : ' · 무음'));
-    setText('introNote', app.live ? '먼저 내 눈과 책 보는 자세를 맞춰요.' : '지금은 모델 연결 전 미리보기예요.');
+    setText('introNote', app.live ? '맞춤 스캔하거나 바로 시작할 수 있어요.' : '지금은 모델 연결 전 미리보기예요.');
   }
   function toast(message) {
     clearTimeout(app.toastId);
@@ -2613,7 +2637,7 @@ self.onmessage = async ({data}) => {
     setText('scanSubtitle',release?'내 기준을 맞췄어요. 정면을 편하게 봐 주세요.':retry?
       (hints[reason]||'이미 끝난 단계는 유지해요. 이 모습만 다시 담아 주세요.'):subtitles[sampleIndex]);
     show('scanCamera',true); show('scanProgress',!release);
-    show('scanButton',!release); $('scanButton').disabled=phase==='capture';
+    show('scanButton',!release); show('scanSkipButton',!release); $('scanButton').disabled=phase==='capture';
     const stable=phase==='capture'&&!reason;
     $('scanCamera').dataset.quality=stable||release&&reason==='ready'?'good':'waiting';
     const text=release?(hints[reason]||'눈을 뜨면 감지를 시작해요.'):phase==='capture'?
@@ -2649,7 +2673,7 @@ self.onmessage = async ({data}) => {
   function completeScan() {
     if(!app.scan?.profile||app.scan.phase!=='complete')return;
     clearScanWatch();haltLoop();stopAudio();
-    app.profile=app.scan.profile;app.model.setProfile(app.profile);app.scan=null;
+    app.profile=app.scan.profile;app.quickMode=false;app.model.setProfile(app.profile);app.scan=null;
     app.cooldownUntil=performance.now()+650;app.paused=false;
     cameraUI(false);setScreen('monitor');renderState('awake');requestWakeLock();startLoop();
   }
@@ -2665,10 +2689,21 @@ self.onmessage = async ({data}) => {
   }
   function beginScan() {
     clearScanWatch();haltLoop();stopAudio();
-    app.scanRenderKey=''; app.profile=null;app.scan=new JoljimaSignals.Calibration();
+    app.scanRenderKey=''; app.profile=null;app.quickMode=false;app.scan=new JoljimaSignals.Calibration();
     app.model.setProfile(null);app.paused=false;app.panelOpen=false;
     cameraUI(false);setScreen('scan');renderScan(app.scan.status());requestWakeLock();startLoop();
   }
+  function skipScan() {
+    if (app.screen !== 'scan' || !app.model || !app.stream || document.hidden) return;
+    clearScanWatch(); haltLoop(); stopAudio();
+    app.scan = null; app.scanRenderKey = ''; app.profile = null; app.quickMode = true;
+    app.model.setProfile(null, true);
+    app.cooldownUntil = performance.now() + 650; app.paused = false;
+    cameraUI(false); setScreen('monitor'); renderState('unknown');
+    requestWakeLock(); startLoop();
+    toast('기본 인식으로 시작했어요. 정확도가 낮으면 설정에서 다시 스캔해 주세요.');
+  }
+  $('scanSkipButton').addEventListener('click', skipScan);
   $('scanButton').addEventListener('click',()=>{
     if(app.screen!=='scan'||!app.scan||document.hidden)return;
     if(['ready','retry'].includes(app.scan.phase)){
@@ -3151,6 +3186,7 @@ self.onmessage = async ({data}) => {
     app.alarmTest = false;
     app.cooldownUntil = 0;
     app.profile = null;
+    app.quickMode = false;
     clearScanWatch(); app.scan = null; app.scanRenderKey = ''; app.lastObservation = null;
     if (canvas) { canvas.width = 1; canvas.height = 1; }
     releaseModel();
@@ -3160,6 +3196,7 @@ self.onmessage = async ({data}) => {
   async function startSession() {
     if (document.hidden || (!['intro', 'error'].includes(app.screen) && !app.paused)) return;
     const resumeProfile = app.paused ? app.profile : null;
+    const resumeQuickMode = app.paused && app.quickMode;
     stopCamera();
     primeAudio();
     stopAudio();
@@ -3186,9 +3223,10 @@ self.onmessage = async ({data}) => {
       await ensureCamera(session);
       if (session !== app.session || document.hidden || !app.stream) return;
       app.model.resetSession();
-      if (resumeProfile) {
+      if (resumeProfile || resumeQuickMode) {
         app.profile = resumeProfile;
-        app.model.setProfile(resumeProfile);
+        app.quickMode = resumeQuickMode;
+        app.model.setProfile(resumeProfile, resumeQuickMode);
         setScreen('monitor');
         renderState('unknown');
         requestWakeLock();
